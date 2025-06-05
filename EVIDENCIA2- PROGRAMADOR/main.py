@@ -1,7 +1,5 @@
-
 #Importamos los modulos
 import dispositivos
-import estado
 import automatizaciones
 from dispositivos import obtener_dispositivos
 
