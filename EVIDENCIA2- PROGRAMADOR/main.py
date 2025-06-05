@@ -33,10 +33,10 @@ def menu():
         elif opcion == "4":
             nombre = input("Nombre del dispositivo: ")
             nuevo_estado = input("Nuevo estado (encendido/apagado): ")
-            estado.cambiar_estado(nombre, nuevo_estado)
+            dispositivos.cambiar_estado(nombre, nuevo_estado)
         elif opcion == "5":
             nombre = input("Nombre del dispositivo: ")
-            estado.ver_estado(nombre)
+            dispositivos.ver_estado(nombre)
         elif opcion == "6":
             automatizaciones.modo_noche()
         elif opcion == "7":
