@@ -1,0 +1,57 @@
+
+usuarios = {
+    "usuario1": "contraseña123",
+    "usuario2": "abc123",
+    "admin": "admin123"
+}
+
+def registrar_usuario():
+    print("\n--- Registro ---")
+    usuario = input("Ingrese un nombre de usuario: ")
+    
+    # Verificar si el usuario ya existe
+    if usuario in usuarios:
+        print("¡El usuario ya existe!")
+        return
+    
+    contraseña = input("Ingrese una contraseña: ")
+    usuarios[usuario] = contraseña
+    print("¡Registro exitoso!")
+
+def iniciar_sesion():
+    print("\n--- Inicio de Sesión ---")
+    usuario = input("Usuario: ")
+    contraseña = input("Contraseña: ")
+    
+    # Verificar credenciales
+    if usuario in usuarios and usuarios[usuario] == contraseña:
+        print(f"¡Bienvenido, {usuario}!")
+        return True  # Inicio de sesión exitoso
+    else:
+        print("Usuario o contraseña incorrectos.")
+        return False  # Inicio de sesión fallido
+
+def menu_principal():
+    while True:
+        print("\n--- Menú Principal ---")
+        print("1. Iniciar sesión")
+        print("2. Registrarse")
+        print("3. Salir")
+        
+        opcion = input("Seleccione una opción: ")
+        
+        if opcion == "1":
+            if iniciar_sesion():
+                # Redirigir al usuario a otra parte del programa
+                print("Acceso concedido a funciones adicionales...")
+                break  # Salir del menú después de iniciar sesión
+        elif opcion == "2":
+            registrar_usuario()
+        elif opcion == "3":
+            print("¡Hasta luego!")
+            break
+        else:
+            print("Opción no válida. Intente de nuevo.")
+
+if __name__ == "__main__":
+    menu_principal()
