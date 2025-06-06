@@ -61,6 +61,17 @@ def listar_dispositivos():
     for nombre, info in dispositivos.items():
         print(f"{nombre} - Tipo: {info['tipo']}, Estado: {info['estado']}")
 
+# Nueva función: convertir usuario estándar en administrador
+def convertir_en_admin():
+    username = input("Nombre de usuario a convertir en admin: ").strip()
+    if username not in usuarios:
+        print("El usuario no existe.")
+    elif usuarios[username]["rol"] == "admin":
+        print("El usuario ya es administrador.")
+    else:
+        usuarios[username]["rol"] = "admin"
+        print(f"El usuario '{username}' ahora es administrador.")
+
 # Menú para usuarios estándar
 def menu_estandar(usuario):
     while True:
@@ -85,6 +96,7 @@ def menu_admin():
         print("1. Agregar dispositivo")
         print("2. Eliminar dispositivo")
         print("3. Listar dispositivos")
+        print("4. Convertir usuario en administrador")
         print("0. Cerrar sesión")
         opcion = input("Opción: ")
 
@@ -98,6 +110,8 @@ def menu_admin():
             eliminar_dispositivo(nombre)
         elif opcion == "3":
             listar_dispositivos()
+        elif opcion == "4":
+            convertir_en_admin()
         elif opcion == "0":
             break
         else:
