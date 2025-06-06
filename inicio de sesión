@@ -5,19 +5,6 @@ usuarios = {
     "admin": "admin123"
 }
 
-def registrar_usuario():
-    print("\n--- Registro ---")
-    usuario = input("Ingrese un nombre de usuario: ")
-    
-    # Verificar si el usuario ya existe
-    if usuario in usuarios:
-        print("¡El usuario ya existe!")
-        return
-    
-    contraseña = input("Ingrese una contraseña: ")
-    usuarios[usuario] = contraseña
-    print("¡Registro exitoso!")
-
 def iniciar_sesion():
     print("\n--- Inicio de Sesión ---")
     usuario = input("Usuario: ")
@@ -35,7 +22,7 @@ def menu_principal():
     while True:
         print("\n--- Menú Principal ---")
         print("1. Iniciar sesión")
-        print("2. Registrarse")
+        print("2. Registro ")
         print("3. Salir")
         
         opcion = input("Seleccione una opción: ")
@@ -45,10 +32,15 @@ def menu_principal():
                 # Redirigir al usuario a otra parte del programa
                 print("Acceso concedido a funciones adicionales...")
                 break  # Salir del menú después de iniciar sesión
+      
         elif opcion == "2":
-            registrar_usuario()
+             print("\n--- Registro de Usuario ---")
+             nombre = input("Ingrese su nombre: ")
+             apellido = input("Ingrese su apellido: ")
+             email = input("Ingrese su email: ")
+             usuarios.registrar_usuario_estandar(nombre, apellido, email)
         elif opcion == "3":
-            print("¡Hasta luego!")
+            print("Saliendo del programa. ¡Hasta luego!")
             break
         else:
             print("Opción no válida. Intente de nuevo.")
