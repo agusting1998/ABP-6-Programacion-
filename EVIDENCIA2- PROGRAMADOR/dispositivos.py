@@ -1,3 +1,4 @@
+# Rol de Agregar, Eliminar y Listar Dispositivos: Santiago Hidalgo
 # Funciones para dispositivos (solo admin)
 def agregar_dispositivo(nombre, tipo, estado):
     if not nombre or not tipo or not estado:
@@ -29,6 +30,7 @@ def listar_dispositivos():
     for nombre, info in dispositivos.items():
         print(f"{nombre} - Tipo: {info['tipo']}, Estado: {info['estado']}")
 
+# Rol de Consultar Dispositivos Interactivos: Diego Mayo
 # ==============================================================================
 # INICIO DE APORTE: Consulta interactiva de dispositivos - DIEGO MAYO
 # Justificación: Cumple con el punto 2.c de la Evidencia 3, una funcionalidad
