@@ -1,3 +1,4 @@
+#Registrar Usuario Estandar: Agustín Gallardo
 usuarios_estandar = {}
 
 #Realice Tres Funciones:
