@@ -1,3 +1,4 @@
+#Inicio de Sesión, Rol Asignado a: Yazmin Orellana
 import main
 import usuario
 
