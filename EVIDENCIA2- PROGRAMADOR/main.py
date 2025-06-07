@@ -42,11 +42,6 @@ def menu():
             automatizaciones.modo_noche()
         elif opcion == "7":
             ver_todo()
-        elif opcion == "8":
-             nombre = input("Nombre: ")
-             apellido = input("Apellido: ")
-             email = input("Email: ")
-             usuario.registrar_usuario_estandar(nombre, apellido, email)
         elif opcion == "0":
             print("Saliendo...")
             break
