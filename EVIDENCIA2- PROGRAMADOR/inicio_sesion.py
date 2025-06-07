@@ -4,10 +4,8 @@ usuarios = {
     "admin": "admin123"
 }
 
-def iniciar_sesion():
-    print("\n--- Inicio de Sesión ---")
-    usuario = input("Usuario: ")
-    contraseña = input("Contraseña: ")
+def iniciar_sesion(usuario,contraseña):
+    print("\n--- Inicio de Sesión ---")   
     
     # Verificar credenciales
     if usuario in usuarios and usuarios[usuario] == contraseña:
