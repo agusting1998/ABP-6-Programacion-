@@ -2,6 +2,8 @@
 import dispositivos
 import automatizaciones
 import usuarios
+import estado
+import soporte
 from dispositivos import obtener_dispositivos
 
 #Manejamos todo desde el menú interactivo
@@ -16,6 +18,7 @@ def menu():
         print("5. Ver estado")
         print("6. Activar modo noche")
         print("7. Ver todo")
+        print("8. Soporte")
         print("0. Salir")
 
         opcion = input("Selecciones una opcion: ")
@@ -34,14 +37,16 @@ def menu():
         elif opcion == "4":
             nombre = input("Nombre del dispositivo: ")
             nuevo_estado = input("Nuevo estado (encendido/apagado): ")
-            dispositivos.cambiar_estado(nombre, nuevo_estado)
+            estado.cambiar_estado_dispositivo(nombre, nuevo_estado)
         elif opcion == "5":
             nombre = input("Nombre del dispositivo: ")
-            dispositivos.ver_estado(nombre)
+            estado.ver_estado_dispositivo(nombre)
         elif opcion == "6":
             automatizaciones.modo_noche()
         elif opcion == "7":
             ver_todo()
+        elif opcion == "8":
+            soporte.mostrar_ayuda()
         elif opcion == "0":
             print("Saliendo...")
             break
