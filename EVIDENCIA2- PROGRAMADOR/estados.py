@@ -1,3 +1,5 @@
+#Asignar Rol de Estados: Agustín Gallardo
+
 from dispositivos import obtener_dispositivos
 
 def ver_estado_dispositivo(nombre):
