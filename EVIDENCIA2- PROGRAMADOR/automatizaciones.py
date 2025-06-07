@@ -1,3 +1,5 @@
+#Rol de Automatizaciones: Santiago Hidalgo
+
 import dispositivos
 
 #Automatización elegida "Modo Noche", activa las camaras y apaga las luces
