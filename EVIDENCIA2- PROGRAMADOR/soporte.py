@@ -1,3 +1,5 @@
+#Rol del Modulo Soporte: Agustín Gallardo
+
 def mostrar_ayuda():
     print("\n--- Centro de Soporte ---")
     print("1. Si un dispositivo no aparece, verifique que haya sido agregado correctamente.")
