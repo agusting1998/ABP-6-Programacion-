@@ -77,4 +77,5 @@ def cambiar_estado_dispositivo(nombre_usuario, dispositivo_id, nuevo_estado):
                 return True
         print(f"Error: Dispositivo ID {dispositivo_id} no encontrado.")
         return False
+
     return False
