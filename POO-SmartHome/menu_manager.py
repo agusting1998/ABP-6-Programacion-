@@ -4,6 +4,7 @@ import dispositivos
 import usuario
 import automatizaciones
 import admin  # Necesario para llamar a las funciones de admin
+import soporte
 
 
 def mostrar_menu_principal():

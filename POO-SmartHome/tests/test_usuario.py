@@ -8,21 +8,21 @@ import usuario
 
 class TestUsuario(unittest.TestCase):
     def setUp(self):
-        usuario.usuarios.clear()
+        usuario.USUARIOS.clear()
 
     def test_registrar_usuario(self):
-        usuario.registrar_usuario_estandar("Agustin", "Gallardo", "agus@mail.com")
-        self.assertIn("agus@mail.com", usuario.usuarios)
+        usuario.registrar_usuario("Agustin", "Gallardo", "agus@mail.com")
+        self.assertIn("agus@mail.com", usuario.USUARIOS)
 
     def test_registrar_usuario_existente(self):
-        usuario.registrar_usuario_estandar("Agustin", "Gallardo", "agus@mail.com")
-        usuario.registrar_usuario_estandar("Agustin", "Gallardo", "agus@mail.com")
-        self.assertEqual(len(usuario.usuarios), 1)
+        usuario.registrar_usuario("Agustin", "Gallardo", "agus@mail.com")
+        usuario.registrar_usuario("Agustin", "Gallardo", "agus@mail.com")
+        self.assertEqual(len(usuario.USUARIOS), 1)
 
     def test_modificar_rol(self):
-        usuario.registrar_usuario_estandar("Agustin", "Gallardo", "agus@mail.com")
-        usuario.modificar_rol("agus@mail.com", "admin")
-        self.assertEqual(usuario.usuarios["agus@mail.com"]["rol"], "admin")
+        usuario.registrar_usuario("Agustin", "Gallardo", "agus@mail.com")
+        usuario.modificar_rol_usuario("agus@mail.com", "admin")
+        self.assertEqual(usuario.USUARIOS["agus@mail.com"]["rol"], "admin")
 
 if __name__ == "__main__":
     unittest.main()

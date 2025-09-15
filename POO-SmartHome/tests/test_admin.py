@@ -19,7 +19,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_modificar_rol_usuario(self):
         usuario.registrar_usuario("Agustin", "1234")
-        usuario.modificar_rol("Agustin", "admin")
+        usuario.modificar_rol_usuario("Agustin", "admin")
         self.assertEqual(USUARIOS["Agustin"]["rol"], "admin")
 
 if __name__ == "__main__":
