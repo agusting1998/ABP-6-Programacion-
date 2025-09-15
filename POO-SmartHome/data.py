@@ -1,4 +1,6 @@
 USUARIOS = {}
+USUARIOS_ADMIN = {} 
+
 """
 Almacena la información de los usuarios.
 Formato:
