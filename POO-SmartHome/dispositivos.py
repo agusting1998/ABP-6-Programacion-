@@ -44,7 +44,7 @@ def eliminar_dispositivo(nombre_usuario, dispositivo_id):
         for disp in dispositivos:
             if disp['id'] == dispositivo_id:
                 dispositivos.remove(disp)
-                print(f"🗑️ Dispositivo ID {dispositivo_id} eliminado exitosamente.")
+                print(f"Dispositivo ID {dispositivo_id} eliminado exitosamente.")
                 return True
         print(f"Error: No se encontró un dispositivo con el ID {dispositivo_id}.")
         return False
@@ -58,13 +58,13 @@ def buscar_dispositivo(nombre_usuario, nombre_dispositivo):
         dispositivos = USUARIOS[nombre_usuario]['dispositivos']
         for disp in dispositivos:
             if disp['nombre'] == nombre_dispositivo:
-                print(f"🔍 Dispositivo encontrado: ID {disp['id']} | Nombre: {disp['nombre']} | Tipo: {disp['tipo']} | Estado: {disp['estado']}")
+                print(f"Dispositivo encontrado: ID {disp['id']} | Nombre: {disp['nombre']} | Tipo: {disp['tipo']} | Estado: {disp['estado']}")
                 return disp
         print(f" Dispositivo '{nombre_dispositivo}' no encontrado.")
         return None
     return None
 
-def cambiar_estado_dispositivo(nombre_usuario, dispositivo_id, nuevo_estado):
+def cambiar_estado(nombre_usuario, dispositivo_id, nuevo_estado):
     """
     Cambia el estado de un dispositivo (encendido/apagado).
     """
@@ -79,3 +79,20 @@ def cambiar_estado_dispositivo(nombre_usuario, dispositivo_id, nuevo_estado):
         return False
 
     return False
+
+
+def ver_estado(nombre_usuario, nombre_dispositivo):
+    """
+    Muestra el estado de un dispositivo específico de un usuario.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        for disp in dispositivos:
+            if disp['nombre'] == nombre_dispositivo:
+                print(f" El dispositivo '{disp['nombre']}' está actualmente '{disp['estado']}'.")
+                return disp['estado']
+        print(f"Error: Dispositivo '{nombre_dispositivo}' no encontrado.")
+        return None
+    else:
+        print(" Error: Usuario no encontrado.")
+        return None
