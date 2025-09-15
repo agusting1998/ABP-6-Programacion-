@@ -1,4 +1,3 @@
-DROP DATABASE if EXISTS hogar_inteligente;
 CREATE DATABASE hogar_inteligente;
 
 USE hogar_inteligente;
