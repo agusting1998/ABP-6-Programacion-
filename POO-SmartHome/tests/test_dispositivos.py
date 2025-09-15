@@ -1,4 +1,9 @@
+import sys
+import os
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import dispositivos
 
 class TestDispositivos(unittest.TestCase):
@@ -23,3 +28,6 @@ class TestDispositivos(unittest.TestCase):
         dispositivos.agregar_dispositivo("Camara", "cámara", "apagado")
         estado = dispositivos.buscar_dispositivo("Camara")["estado"]
         self.assertEqual(estado, "apagado")
+
+if __name__ == "__main__":
+    unittest.main()
