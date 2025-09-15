@@ -3,7 +3,8 @@
 import dispositivos
 import usuario
 import automatizaciones
-import admin # Necesario para llamar a las funciones de admin
+import admin  # Necesario para llamar a las funciones de admin
+
 
 def mostrar_menu_principal():
     """Muestra el menú principal de la aplicación."""
@@ -11,61 +12,91 @@ def mostrar_menu_principal():
         print("\n--- Menú Principal ---")
         print("A. Registrar usuario estándar")
         print("B. Registrar usuario admin")
-        print("1. Gestionar Dispositivos (Acceso General)")
-        print("2. Activar modo noche")
-        print("3. Soporte")
+        print("1. Iniciar sesión")
+        print("2. Gestionar Dispositivos (Acceso General)")
+        print("3. Activar modo noche")
+        print("4. Soporte")
         print("0. Salir")
 
         opcion = input("Seleccione una opción: ").upper()
 
         if opcion == "A":
-            nombre = input("Ingrese su nombre: ")
-            apellido = input("Ingrese su apellido: ")
-            email = input("Ingrese su email: ")
-            usuario.registrar_usuario_estandar(nombre, apellido, email)
-            # Después de registrar, podríamos querer ir al menú de usuario estándar
-            if email in usuario.obtener_usuarios(): # Verificar si el registro fue exitoso
-                mostrar_menu_usuario_estandar(nombre)
+            nombre = input("Ingrese su nombre de usuario: ")
+            contrasena = input("Ingrese su contraseña: ")
+            usuario.registrar_usuario(nombre, contrasena, rol="estandar")
+
         elif opcion == "B":
-            admin.registrar_y_loguear_admin() # Esta función ya llama a mostrar_menu_admin_principal() internamente
+            nombre = input("Ingrese su nombre de usuario admin: ")
+            contrasena = input("Ingrese su contraseña: ")
+            usuario.registrar_usuario(nombre, contrasena, rol="admin")
+
         elif opcion == "1":
-            mostrar_menu_gestion_dispositivos_general() # Nuevo menú de gestión de dispositivos para todos
+            nombre = input("Usuario: ")
+            contrasena = input("Contraseña: ")
+            datos = usuario.iniciar_sesion(nombre, contrasena)
+            if datos:  # Si el login fue exitoso
+                if datos["rol"] == "admin":
+                    mostrar_menu_admin_principal(nombre)
+                else:
+                    mostrar_menu_usuario_estandar(nombre)
+
         elif opcion == "2":
-            automatizaciones.modo_noche()
+            mostrar_menu_gestion_dispositivos_general()
+
         elif opcion == "3":
-            import soporte # Importar aquí si no se usa en todo el módulo
+            # Para el modo noche general en el menú principal, pedimos usuario
+            nombre_usuario = input("Ingrese su nombre de usuario para activar Modo Noche: ")
+            automatizaciones.modo_noche(nombre_usuario)
+
+        elif opcion == "4":
+            import soporte
             soporte.mostrar_ayuda()
+
         elif opcion == "0":
             print("Saliendo de la aplicación...")
             break
+
         else:
             print("Opción inválida. Intente nuevamente.")
 
-def mostrar_menu_admin_principal():
+
+def mostrar_menu_admin_principal(nombre_usuario):
     """Muestra el menú principal para administradores."""
     while True:
         print("\n--- Menú Principal - Admin ---")
         print("A) Consultar automatizaciones activas")
         print("B) Gestionar dispositivos")
         print("C) Modificar rol de usuario")
-        print("0) Volver al menú principal") # Cambiado para volver al menú principal general
-        
+        print("D) Ver usuarios registrados")
+        print("0) Volver al menú principal")
+
         opcion = input("Seleccione una opción: ").upper()
-        
+
         if opcion == "A":
-           print("\nAutomatizaciones activas:")
-           automatizaciones.modo_noche()
+            print("\nAutomatizaciones activas:")
+            # Modo noche para el admin actual
+            automatizaciones.modo_noche(nombre_usuario)
+
         elif opcion == "B":
-            mostrar_menu_gestion_dispositivos_admin() # Llama al menú de gestión de dispositivos específico de admin
+            mostrar_menu_gestion_dispositivos_admin(nombre_usuario)
+
         elif opcion == "C":
-            admin.modificar_rol_usuario() # La lógica de modificar rol sigue en admin.py
+            nombre = input("Usuario a modificar: ")
+            nuevo_rol = input("Nuevo rol: ")
+            usuario.modificar_rol_usuario(nombre, nuevo_rol)
+
+        elif opcion == "D":
+            usuario.mostrar_usuarios()
+
         elif opcion == "0":
             print("Volviendo al menú principal.")
             break
+
         else:
             print("Opción no válida. Intente nuevamente.")
 
-def mostrar_menu_gestion_dispositivos_admin():
+
+def mostrar_menu_gestion_dispositivos_admin(nombre_usuario):
     """Muestra el menú de gestión de dispositivos para administradores."""
     while True:
         print("\n--- Gestión de Dispositivos (Admin) ---")
@@ -79,33 +110,36 @@ def mostrar_menu_gestion_dispositivos_admin():
 
         opcion = input("Seleccione una opcion: ")
         if opcion == "1":
-            nombre = input("Nombre del dispositivo: ")
+            nombre_disp = input("Nombre del dispositivo: ")
             tipo = input("Tipo de dispositivo (luz, cámara, electrodoméstico): ")
             estado = input("Estado inicial (encendido/apagado): ")
-            dispositivos.agregar_dispositivo(nombre, tipo, estado)
+            dispositivos.agregar_dispositivo(nombre_usuario, nombre_disp, tipo, estado)
         elif opcion == "2":
-            nombre = input("Nombre del dispositivo a eliminar: ")
-            dispositivos.eliminar_dispositivo(nombre)
+            try:
+                disp_id = int(input("ID del dispositivo a eliminar: "))
+                dispositivos.eliminar_dispositivo(nombre_usuario, disp_id)
+            except ValueError:
+                print("ID inválido.")
         elif opcion == "3":
-            dispositivos.listar_dispositivos()
+            dispositivos.listar_dispositivos(nombre_usuario)
         elif opcion == "4":
-            nombre = input("Nombre del dispositivo a buscar: ")
-            resultado = dispositivos.buscar_dispositivo(nombre)
-            if resultado:
-                print(f"Dispositivo encontrado: {nombre} - Tipo: {resultado['tipo']}, Estado: {resultado['estado']}")
-            else:
-                print("Dispositivo no encontrado.")
+            nombre_disp = input("Nombre del dispositivo a buscar: ")
+            dispositivos.buscar_dispositivo(nombre_usuario, nombre_disp)
         elif opcion == "5":
-            nombre = input("Nombre del dispositivo: ")
-            nuevo_estado = input("Nuevo estado (encendido/apagado): ")
-            dispositivos.cambiar_estado(nombre, nuevo_estado)
+            try:
+                disp_id = int(input("ID del dispositivo: "))
+                nuevo_estado = input("Nuevo estado (encendido/apagado): ").lower()
+                dispositivos.cambiar_estado(nombre_usuario, disp_id, nuevo_estado)
+            except ValueError:
+                print("ID inválido.")
         elif opcion == "6":
-            nombre = input("Nombre del dispositivo: ")
-            dispositivos.ver_estado(nombre)
+            nombre_disp = input("Nombre del dispositivo: ")
+            dispositivos.ver_estado(nombre_usuario, nombre_disp)
         elif opcion == "0":
             break
         else:
             print("Opción no válida.")
+
 
 def mostrar_menu_gestion_dispositivos_general():
     """Muestra un menú de gestión de dispositivos más limitado para usuarios generales."""
@@ -117,14 +151,17 @@ def mostrar_menu_gestion_dispositivos_general():
 
         opcion = input("Seleccione una opcion: ")
         if opcion == "1":
-            dispositivos.listar_dispositivos()
+            nombre_usuario = input("Ingrese su nombre de usuario: ")
+            dispositivos.listar_dispositivos(nombre_usuario)
         elif opcion == "2":
-            nombre = input("Nombre del dispositivo: ")
-            dispositivos.ver_estado(nombre)
+            nombre_usuario = input("Ingrese su nombre de usuario: ")
+            nombre_disp = input("Nombre del dispositivo: ")
+            dispositivos.ver_estado(nombre_usuario, nombre_disp)
         elif opcion == "0":
             break
         else:
             print("Opción no válida.")
+
 
 def mostrar_menu_usuario_estandar(nombre_usuario):
     """Muestra el menú para usuarios estándar."""
@@ -138,15 +175,19 @@ def mostrar_menu_usuario_estandar(nombre_usuario):
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            print("Datos personales:")
-            usuario.mostrar_usuarios() # Esto muestra todos los usuarios, quizás quieras mostrar solo el del usuario logueado
+            usuario.consultar_datos_personales(nombre_usuario)
         elif opcion == "2":
-            automatizaciones.modo_noche()
+            automatizaciones.modo_noche(nombre_usuario)
         elif opcion == "3":
-            # La función consultar_dispositivos_interactivo ya maneja su propio bucle y salida
-            dispositivos.consultar_dispositivos_interactivo()
+            nombre_usuario = input("Ingrese su nombre de usuario: ")
+            nombre_disp = input("Nombre del dispositivo: ")
+            dispositivos.ver_estado(nombre_usuario, nombre_disp)
         elif opcion == "0":
             print("Cerrando sesión del usuario estándar.")
             break
         else:
             print("Opción inválida.")
+
+
+if __name__ == "__main__":
+    mostrar_menu_principal()

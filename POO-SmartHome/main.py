@@ -1,6 +1,6 @@
 import usuario
-import dispositivo
-import automatizacion
+import dispositivos
+import automatizaciones
 from data import USUARIOS
 
 def menu_estandar(usuario_data):
@@ -19,9 +19,9 @@ def menu_estandar(usuario_data):
         if opcion == '1':
             usuario.consultar_datos_personales(nombre_usuario)
         elif opcion == '2':
-            dispositivo.listar_dispositivos(nombre_usuario)
+            dispositivos.listar_dispositivos(nombre_usuario)
         elif opcion == '3':
-            automatizacion.modo_ahorro_energia(nombre_usuario)
+            automatizaciones.modo_ahorro_energia(nombre_usuario)
         elif opcion == '4':
             print(" Sesión cerrada.")
             break
@@ -44,7 +44,7 @@ def menu_admin(usuario_data):
         if opcion == '1':
             menu_gestion_dispositivos(nombre_usuario)
         elif opcion == '2':
-            automatizacion.consultar_automatizaciones_activas()
+            automatizaciones.consultar_automatizaciones_activas()
         elif opcion == '3':
             nombre_target = input("Ingresa el nombre del usuario a modificar: ")
             nuevo_rol = input("Ingresa el nuevo rol ('admin' o 'estandar'): ").lower()
@@ -71,13 +71,13 @@ def menu_gestion_dispositivos(nombre_usuario):
         if opcion == '1':
             nombre_disp = input("Nombre del dispositivo: ")
             tipo_disp = input("Tipo (luz, termostato, camara, electrodomestico): ")
-            dispositivo.agregar_dispositivo(nombre_usuario, nombre_disp, tipo_disp)
+            dispositivos.agregar_dispositivo(nombre_usuario, nombre_disp, tipo_disp)
         elif opcion == '2':
-            dispositivo.listar_dispositivos(nombre_usuario)
+            dispositivos.listar_dispositivos(nombre_usuario)
         elif opcion == '3':
             try:
                 dispositivo_id = int(input("ID del dispositivo a eliminar: "))
-                dispositivo.eliminar_dispositivo(nombre_usuario, dispositivo_id)
+                dispositivos.eliminar_dispositivo(nombre_usuario, dispositivo_id)
             except ValueError:
                 print(" Entrada inválida. El ID debe ser un número.")
         elif opcion == '4':
@@ -85,7 +85,7 @@ def menu_gestion_dispositivos(nombre_usuario):
                 dispositivo_id = int(input("ID del dispositivo a cambiar: "))
                 nuevo_estado = input("Nuevo estado (encendido/apagado): ").lower()
                 if nuevo_estado in ['encendido', 'apagado']:
-                    dispositivo.cambiar_estado_dispositivo(nombre_usuario, dispositivo_id, nuevo_estado)
+                    dispositivos.cambiar_estado(nombre_usuario, dispositivo_id, nuevo_estado)
                 else:
                     print(" Estado inválido. Usa 'encendido' o 'apagado'.")
             except ValueError:

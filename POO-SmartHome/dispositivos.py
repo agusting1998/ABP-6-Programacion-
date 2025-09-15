@@ -1,117 +1,98 @@
-#Rol compartido entre Diego Mayo, Matias Aranda y Santiago Hidalgo
 
-# Diccionario para almacenar los dispositivos
-dispositivos = {}
+from data import USUARIOS
 
-# Funciones generales
-# Funcion para agregar un producto
-def agregar_dispositivo(nombre_disp, tipo, estado):
-    #validaciones
-    if not nombre_disp or not tipo or not estado:
-        print("No se permiten campos vacíos.")
-    if tipo not in {"luz", "cámara", "electrodoméstico"}:
-        print("Error: Tipo no válido. Debe ser: luz, cámara o electrodoméstico.")
-        return
+def agregar_dispositivo(nombre_usuario, nombre_dispositivo, tipo_dispositivo, estado_inicial='apagado'):
+    """
+    Agrega un nuevo dispositivo al usuario actual.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivo_id = len(USUARIOS[nombre_usuario]['dispositivos']) + 1
+        nuevo_dispositivo = {
+            'id': dispositivo_id,
+            'nombre': nombre_dispositivo,
+            'tipo': tipo_dispositivo,
+            'estado': estado_inicial
+        }
+        USUARIOS[nombre_usuario]['dispositivos'].append(nuevo_dispositivo)
+        print(f" Dispositivo '{nombre_dispositivo}' agregado exitosamente.")
+        return True
+    return False
 
-    if estado not in {"encendido", "apagado"}:
-        print("Error: Estado no válido. Debe ser: encendido o apagado.")
-        return
-    if nombre_disp in dispositivos:
-        print(f'El dispositivo {nombre_disp}, ya existe')
+def listar_dispositivos(nombre_usuario):
+    """
+    Muestra una lista de todos los dispositivos del usuario.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        if not dispositivos:
+            print(" No tienes dispositivos registrados.")
+            return
+
+        print("\n--- Tus Dispositivos ---")
+        for disp in dispositivos:
+            print(f"ID: {disp['id']} | Nombre: {disp['nombre']} | Tipo: {disp['tipo']} | Estado: {disp['estado']}")
+        print("-----------------------\n")
     else:
-        dispositivos[nombre_disp] = {"tipo": tipo, "estado": estado}
-        print(f'Dispositivo {nombre_disp}, agregado.')
-    
+        print(" Error: Usuario no encontrado.")
+
+def eliminar_dispositivo(nombre_usuario, dispositivo_id):
+    """
+    Elimina un dispositivo por su ID.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        for disp in dispositivos:
+            if disp['id'] == dispositivo_id:
+                dispositivos.remove(disp)
+                print(f"Dispositivo ID {dispositivo_id} eliminado exitosamente.")
+                return True
+        print(f"Error: No se encontró un dispositivo con el ID {dispositivo_id}.")
+        return False
+    return False
+
+def buscar_dispositivo(nombre_usuario, nombre_dispositivo):
+    """
+    Busca un dispositivo por su nombre.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        for disp in dispositivos:
+            if disp['nombre'] == nombre_dispositivo:
+                print(f"Dispositivo encontrado: ID {disp['id']} | Nombre: {disp['nombre']} | Tipo: {disp['tipo']} | Estado: {disp['estado']}")
+                return disp
+        print(f" Dispositivo '{nombre_dispositivo}' no encontrado.")
+        return None
+    return None
+
+def cambiar_estado(nombre_usuario, dispositivo_id, nuevo_estado):
+    """
+    Cambia el estado de un dispositivo (encendido/apagado).
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        for disp in dispositivos:
+            if disp['id'] == dispositivo_id:
+                disp['estado'] = nuevo_estado
+                print(f" El estado de '{disp['nombre']}' ha cambiado a '{nuevo_estado}'.")
+                return True
+        print(f"Error: Dispositivo ID {dispositivo_id} no encontrado.")
+        return False
+
+    return False
 
 
-# Funcion para eliminar un producto
-def eliminar_dispositivo(nombre_disp):
-    if nombre_disp in dispositivos:
-        del dispositivos[nombre_disp]
-        print(f' Dispositivo {nombre_disp}, eliminado.')
+def ver_estado(nombre_usuario, nombre_dispositivo):
+    """
+    Muestra el estado de un dispositivo específico de un usuario.
+    """
+    if nombre_usuario in USUARIOS:
+        dispositivos = USUARIOS[nombre_usuario]['dispositivos']
+        for disp in dispositivos:
+            if disp['nombre'] == nombre_dispositivo:
+                print(f" El dispositivo '{disp['nombre']}' está actualmente '{disp['estado']}'.")
+                return disp['estado']
+        print(f"Error: Dispositivo '{nombre_dispositivo}' no encontrado.")
+        return None
     else:
-        print(f'El dispositivo {nombre_disp}, no existe.')
-
-
-# Funcion que lista los productos
-def listar_dispositivos():
-    if not dispositivos:
-        print(f'No hay dispositivos registrados...')
-    for nombre_disp, info in dispositivos.items():
-        print(f'{nombre_disp} - Tipo: {info["tipo"]}, Estado: {info["estado"]}')
-
-
-# Funcion para buscar un dispositvo
-def buscar_dispositivo(nombre_disp):
-    return dispositivos.get(nombre_disp, None)
-
-
-# Funcion para mostrar los dispositivos almacenados
-def obtener_dispositivos():
-    return dispositivos
-
-
-# Función para cambiar el estado del dispositivo (Encendido/Apagado)
-def cambiar_estado(nombre_disp, nuevo_estado):
-    dispositivo = buscar_dispositivo(nombre_disp)
-    if dispositivo:
-        dispositivo['estado'] = nuevo_estado
-        print(
-            f"Estado del dispositivo '{nombre_disp}' cambiado a '{nuevo_estado}'.")
-    else:
-        print(f"No se encontró el dispositivo '{nombre_disp}'.")
-
-
-# Función que muestra el estado del dispositivo (Encendido/Apagado)
-def ver_estado(nombre_disp):
-    dispositivo = buscar_dispositivo(nombre_disp)
-
-    if dispositivo:
-        print(f"{nombre_disp}: {dispositivo['estado']}")
-    else:
-        print(f"Dispositivo '{nombre_disp}' no encontrado..")
-
-# Rol de Consultar Dispositivos Interactivos: Diego Mayo
-# ==============================================================================
-# INICIO DE APORTE: Consulta interactiva de dispositivos - DIEGO MAYO
-# Justificación: Cumple con el punto 2.c de la Evidencia 3, una funcionalidad
-# de consulta interactiva que mejora la experiencia del usuario.
-# La lógica se basa en conceptos
-# como bucles 'while', condicionales 'if/elif/else' y manejo de diccionarios.
-# ==============================================================================
-def consultar_dispositivos_interactivo():
-   while True:
-       print("\n--- Consulta de Dispositivos ---")
-       hay_dispositivos = listar_dispositivos() # Reutiliza función existente
-      
-       if not hay_dispositivos:
-           input("Presione Enter para volver al menú principal...")
-           break
-
-
-       print("\nOpciones:")
-       print("1. Ver estado de un dispositivo específico")
-       print("0. Volver al menú principal")
-
-
-       opcion = input("Seleccione una opción: ").strip()
-
-
-       if opcion == '1':
-           nombre_disp = input("Ingrese el nombre del dispositivo para ver su estado: ").strip()
-           if nombre_disp in dispositivos:
-               info = dispositivos[nombre_disp]
-               print(f"-> Detalle: El dispositivo '{nombre_disp}' ({info['tipo']}) está actualmente '{info['estado']}'.")
-           else:
-               print(f"El dispositivo '{nombre_disp}' no fue encontrado.")
-           input("Presione Enter para continuar...")
-
-
-       elif opcion == '0':
-           break
-       else:
-           print("Opción no válida.")
-# ==============================================================================
-# FIN DE APORTE: DIEGO MAYO
-# ==============================================================================
-# # Test cambio DiegoJosem en una línea nueva.(Por algun motivo no puedo desde VS Code)
+        print(" Error: Usuario no encontrado.")
+        return None
