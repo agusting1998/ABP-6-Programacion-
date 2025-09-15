@@ -36,8 +36,6 @@ def modificar_rol(email, nuevo_rol):
     else:
         print("Usuario no encontrado")
 
-
-Copiar y pegar/ Soporte.py
 def mostrar_ayuda():
     print("\n--- Centro de Soporte ---")
     print("1. Si un dispositivo no aparece, verifique que haya sido agregado correctamente.")
