@@ -1,11 +1,11 @@
 USE hogar_inteligente;
 
 INSERT INTO Usuario (email, nombre, apellido, contraseña, rol) VALUES
-('yazmin@example.com', 'Yazmin', 'Orellana', 'pass123', 'admin'),
-('diego@example.com', 'Diego', 'Mayo', 'pass456', 'admin'),
-('matias@example.com', 'Matias', 'Aranda', 'pass789', 'admin'),
-('santiago@example.com', 'Santiago', 'Hidalgo', 'pass101', 'usuario'),
-('agustin@example.com', 'Agustin', 'Gallardo', 'pass112', 'usuario');
+('yazmin@gmail.com', 'Yazmin', 'Orellana', 'pass123', 'admin'),
+('diego@gmail.com', 'Diego', 'Mayo', 'pass456', 'admin'),
+('matias@gmail.com', 'Matias', 'Aranda', 'pass789', 'admin'),
+('santiago@gmail.com', 'Santiago', 'Hidalgo', 'pass101', 'usuario'),
+('agustin@gmail.com', 'Agustin', 'Gallardo', 'pass112', 'usuario');
 
 INSERT INTO Dispositivo (nombre_dispositivo, tipo, estado) VALUES
 ('luz_sala_estar', 'luz', 'encendido'),
@@ -32,22 +32,22 @@ INSERT INTO Automatizacion (nombre_automatizacion, descripcion, acciones) VALUES
 ('Alarma de Humo', 'Suena alarma, enciende luces de emergencia y notifica.', 'Sonar alarma, encender luces, notificar');
 
 INSERT INTO Gestion (email_usuario, nombre_dispositivo) VALUES
-('yazmin@example.com', 'luz_sala_estar'),
-('yazmin@example.com', 'camara_puerta'),
-('diego@example.com', 'luz_cocina'),
-('diego@example.com', 'termostato'),
-('matias@example.com', 'reproductor_tv'),
-('santiago@example.com', 'luz_sala_estar'),
-('santiago@example.com', 'luz_cocina'),
-('agustin@example.com', 'termostato');
+('yazmin@gmail.com', 'luz_sala_estar'),
+('yazmin@gmail.com', 'camara_puerta'),
+('diego@gmail.com', 'luz_cocina'),
+('diego@gmail.com', 'termostato'),
+('matias@gmail.com', 'reproductor_tv'),
+('santiago@gmail.com', 'luz_sala_estar'),
+('santiago@gmail.com', 'luz_cocina'),
+('agustin@gmail.com', 'termostato');
 
 
 INSERT INTO Activacion (email_usuario, nombre_automatizacion, fecha_activacion) VALUES
-('yazmin@example.com', 'Modo Noche', '2025-09-12 21:00:00'),
-('diego@example.com', 'Modo Día', '2025-09-12 08:30:00'),
-('matias@example.com', 'Bienvenida Casa', '2025-09-11 18:45:00'),
-('santiago@example.com', 'Modo Noche', '2025-09-11 22:15:00'),
-('agustin@example.com', 'Alarma de Humo', '2025-09-15 01:00:00');
+('yazmin@gmail.com', 'Modo Noche', '2025-09-12 21:00:00'),
+('diego@gmail.com', 'Modo Día', '2025-09-12 08:30:00'),
+('matias@gmail.com', 'Bienvenida Casa', '2025-09-11 18:45:00'),
+('santiago@gmail.com', 'Modo Noche', '2025-09-11 22:15:00'),
+('agustin@gmail.com', 'Alarma de Humo', '2025-09-15 01:00:00');
 
 INSERT INTO Control (nombre_automatizacion, nombre_dispositivo) VALUES
 ('Modo Noche', 'luz_sala_estar'),
