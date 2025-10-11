@@ -32,13 +32,6 @@ class GestorUsuarios:
             self.usuarios[nombre] = usuario
             print(f"Usuario {nombre} registrado con éxito como {rol}.")
             
-    def registrar_usuario_admin(self, nombre, contrasena, rol='admin'):
-        if nombre in self.usuarios:
-            print("Ya existe un admin con ese nombre.")
-        else:
-            usuario = Usuario(nombre, contrasena, rol)
-            self.usuarios[nombre] = usuario
-            print(f"Usuario {nombre} registrado con éxito como {rol}.")
 
     def iniciar_sesion(self, nombre, contrasena):
         usuario = self.usuarios.get(nombre)

@@ -21,7 +21,7 @@ def main():
         elif opcion == '2':
             nombre_admin = input("Ingresa tu nombre de usuario: ")
             contrasena = input("Ingresa tu contraseña: ")
-            gestor.registrar_usuario_admin(nombre_admin, contrasena, rol='admin')
+            gestor.registrar_usuario(nombre_admin, contrasena, rol='admin')
 
         elif opcion == '3':
             nombre = input("Ingresa tu nombre de usuario: ")

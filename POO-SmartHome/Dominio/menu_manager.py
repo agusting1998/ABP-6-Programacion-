@@ -2,7 +2,7 @@
 
 import dispositivos
 import usuario
-import automatizaciones
+from automatizaciones import control_automatizaciones
 from main import gestor  # Importamos el gestor de usuarios desde main.py
 
 def menu_estandar(usuario_obj):
@@ -22,7 +22,7 @@ def menu_estandar(usuario_obj):
         elif opcion == '2':
             dispositivos.listar_dispositivos(usuario_obj.dispositivos)
         elif opcion == '3':
-            automatizaciones.modo_ahorro_energia(usuario_obj)
+            control_automatizaciones.modo_ahorro_energia(usuario_obj)
         elif opcion == '4':
             print(" Sesión cerrada.")
             break
@@ -44,7 +44,7 @@ def menu_admin(usuario_obj):
         if opcion == '1':
             menu_gestion_dispositivos(usuario_obj)
         elif opcion == '2':
-            automatizaciones.consultar_automatizaciones_activas()
+            control_automatizaciones.consultar_automatizaciones_activas()
         elif opcion == '3':
             nombre_target = input("Ingresa el nombre del usuario a modificar: ")
             nuevo_rol = input("Ingresa el nuevo rol ('admin' o 'estandar'): ").lower()
@@ -318,5 +318,4 @@ def menu_gestion_dispositivos(usuario_obj):
 #             print("Opción inválida.")
 
 
-if __name__ == "__main__":
-    mostrar_menu_principal()
+

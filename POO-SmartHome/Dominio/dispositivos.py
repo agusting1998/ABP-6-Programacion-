@@ -2,10 +2,12 @@
 
 # CLASES DE DISPOSITIVOS
 class Dispositivo:
-    def __init__(self, nombre, device_id, estado_inicial="apagado"):
+    def __init__(self, nombre, device_id, estado_inicial="apagado", tipo ="generico"):
         self.nombre = nombre
         self.id = device_id
         self.estado = estado_inicial
+        self.tipo = tipo
+
 
     def cambiar_estado(self, nuevo_estado):
         if nuevo_estado in ['encendido', 'apagado']:
@@ -16,12 +18,12 @@ class Dispositivo:
         return False
 
     def __str__(self):
-        return f'ID: {self.id} | Nombre: {self.nombre} | Estado: {self.estado}'
+        return f'ID: {self.id} | Nombre: {self.nombre} (Tipo: {self.tipo}) | Estado: {self.estado}'
 
 
 class LuzInteligente(Dispositivo):
     def __init__(self, nombre, device_id, estado_inicial="apagado", brillo=0):
-        super().__init__(nombre, device_id, estado_inicial)
+        super().__init__(nombre, device_id, estado_inicial, tipo = 'luz')
         self.brillo = brillo
 
     def cambiar_estado(self, nuevo_estado):
@@ -46,10 +48,10 @@ def agregar_dispositivo(lista_dispositivos, nombre, tipo, estado_inicial="apagad
     """
     device_id = len(lista_dispositivos) + 1
 
-    if tipo.lower() == "luz inteligente":
+    if tipo.lower() == "luz inteligente" or tipo.lower() =="luz":
         nuevo_disp = LuzInteligente(nombre, device_id, estado_inicial)
     else:
-        nuevo_disp = Dispositivo(nombre, device_id, estado_inicial)
+        nuevo_disp = Dispositivo(nombre, device_id, estado_inicial, tipo.lower())
 
     lista_dispositivos.append(nuevo_disp)
     print(f"Dispositivo '{nombre}' agregado exitosamente.")

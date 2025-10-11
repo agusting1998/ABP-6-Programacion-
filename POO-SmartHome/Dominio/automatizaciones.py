@@ -1,55 +1,64 @@
-def modo_ahorro_energia(usuario_obj):
-    """
-    Activa el Modo Ahorro de Energía:
-    Apaga todos los dispositivos que sean luces o electrodomésticos.
-    """
-    print("\n🔋 Activando Modo Ahorro de Energía...")
+class ControlAutomatizaciones:
 
-    dispositivos_apagados = 0
-    for disp in usuario_obj.dispositivos:
-        if disp.tipo in ['luz', 'electrodomestico']:
-            if disp.estado == 'encendido':
+    """Contiene la logica de todas las automatizaciones"""
+
+    def __init__(self,):
+        pass
+
+
+    def modo_ahorro_energia(self, usuario_obj):
+        """
+            Activa el Modo Ahorro de Energía:
+            Apaga todos los dispositivos que sean luces o electrodomésticos.
+        """
+        print("\n Activando Modo Ahorro de Energía...")
+
+        dispositivos_apagados = 0
+        for disp in usuario_obj.dispositivos:
+            if disp.tipo in ['luz', 'electrodomestico']:
+                if disp.estado == 'encendido':
+                    disp.cambiar_estado('apagado')
+                    dispositivos_apagados += 1
+                    print(f"Apagando: {disp.nombre} ({disp.tipo})")
+
+        print(f"\n Modo Ahorro de Energía activado. {dispositivos_apagados} dispositivos apagados.\n")
+
+
+    def modo_noche(self, usuario_obj):
+        """
+             Activa el Modo Noche:
+             - Apaga luces
+             - Apaga electrodomésticos
+             - Enciende cámaras de seguridad
+        """
+        print("\n Activando Modo Noche...")
+
+        luces_apagadas = 0
+        electro_apagados = 0
+        camaras_encendidas = 0
+
+        for disp in usuario_obj.dispositivos:
+            if disp.tipo == 'luz' and disp.estado != 'apagado':
                 disp.cambiar_estado('apagado')
-                dispositivos_apagados += 1
-                print(f"Apagando: {disp.nombre} ({disp.tipo})")
+                luces_apagadas += 1
+                print(f"Apagando luz: {disp.nombre}")
 
-    print(f"\n✅ Modo Ahorro de Energía activado. {dispositivos_apagados} dispositivos apagados.\n")
+            elif disp.tipo == 'electrodomestico' and disp.estado != 'apagado':
+                disp.cambiar_estado('apagado')
+                electro_apagados += 1
+                print(f"Apagando electrodoméstico: {disp.nombre}")
 
+            elif disp.tipo == 'cámara' and disp.estado != 'encendido':
+                disp.cambiar_estado('encendido')
+                camaras_encendidas += 1
+                print(f"Encendiendo cámara: {disp.nombre}")
 
-def modo_noche(usuario_obj):
-    """
-    Activa el Modo Noche:
-    - Apaga luces
-    - Apaga electrodomésticos
-    - Enciende cámaras de seguridad
-    """
-    print("\n🌙 Activando Modo Noche...")
+        print(f"\n Modo Noche activado.")
+        print(f"   Luces apagadas: {luces_apagadas}")
+        print(f"   Electrodomésticos apagados: {electro_apagados}")
+        print(f"   Cámaras encendidas: {camaras_encendidas}\n")
 
-    luces_apagadas = 0
-    electro_apagados = 0
-    camaras_encendidas = 0
-
-    for disp in usuario_obj.dispositivos:
-        if disp.tipo == 'luz' and disp.estado != 'apagado':
-            disp.cambiar_estado('apagado')
-            luces_apagadas += 1
-            print(f"Apagando luz: {disp.nombre}")
-
-        elif disp.tipo == 'electrodomestico' and disp.estado != 'apagado':
-            disp.cambiar_estado('apagado')
-            electro_apagados += 1
-            print(f"Apagando electrodoméstico: {disp.nombre}")
-
-        elif disp.tipo == 'cámara' and disp.estado != 'encendido':
-            disp.cambiar_estado('encendido')
-            camaras_encendidas += 1
-            print(f"Encendiendo cámara: {disp.nombre}")
-
-    print(f"\n✅ Modo Noche activado.")
-    print(f"   Luces apagadas: {luces_apagadas}")
-    print(f"   Electrodomésticos apagados: {electro_apagados}")
-    print(f"   Cámaras encendidas: {camaras_encendidas}\n")
-
+control_automatizaciones = ControlAutomatizaciones() 
 
 def consultar_automatizaciones_activas():
     """Muestra las automatizaciones disponibles."""
