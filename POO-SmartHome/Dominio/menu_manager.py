@@ -1,14 +1,12 @@
-# Este módulo se encarga de la presentación de menús y la interacción con el usuario.
+# menu_manager.py
 
 import dispositivos
-import usuario
-from automatizaciones import control_automatizaciones
-from main import gestor  # Importamos el gestor de usuarios desde main.py
+from automatizaciones import control_automatizaciones, consultar_automatizaciones_activas
+from connection import get_connection
+
+# --- MENÚS ---
 
 def menu_estandar(usuario_obj):
-    """
-    Menú de opciones para un usuario estándar.
-    """
     while True:
         print(f"\n--- Menú de Usuario Estándar ({usuario_obj.nombre}) ---")
         print("1. Consultar mis datos personales")
@@ -29,10 +27,8 @@ def menu_estandar(usuario_obj):
         else:
             print(" Opción inválida. Inténtalo de nuevo.")
 
-def menu_admin(usuario_obj):
-    """
-    Menú de opciones para un usuario administrador.
-    """
+
+def menu_admin(usuario_obj, gestor):
     while True:
         print(f"\n--- Menú de Administrador ({usuario_obj.nombre}) ---")
         print("1. Gestionar dispositivos")
@@ -44,13 +40,21 @@ def menu_admin(usuario_obj):
         if opcion == '1':
             menu_gestion_dispositivos(usuario_obj)
         elif opcion == '2':
-            control_automatizaciones.consultar_automatizaciones_activas()
+            consultar_automatizaciones_activas()
         elif opcion == '3':
             nombre_target = input("Ingresa el nombre del usuario a modificar: ")
             nuevo_rol = input("Ingresa el nuevo rol ('admin' o 'estandar'): ").lower()
             target = gestor.usuarios.get(nombre_target)
             if target:
                 target.modificar_rol(nuevo_rol)
+                conn = get_connection()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE Usuario SET rol=? WHERE nombre=?",
+                    (nuevo_rol, nombre_target)
+                )
+                conn.commit()
+                conn.close()
             else:
                 print(f"El usuario {nombre_target} no existe.")
         elif opcion == '4':
@@ -59,12 +63,9 @@ def menu_admin(usuario_obj):
         else:
             print(" Opción inválida. Inténtalo de nuevo.")
 
-def menu_gestion_dispositivos(usuario_obj):
-    """
-    Sub-menú para gestionar dispositivos (solo admin).
-    """
-    lista_dispositivos = usuario_obj.dispositivos
 
+def menu_gestion_dispositivos(usuario_obj):
+    lista_dispositivos = usuario_obj.dispositivos
     while True:
         print("\n--- Sub-menú de Gestión de Dispositivos ---")
         print("1. Agregar dispositivo")
@@ -77,7 +78,19 @@ def menu_gestion_dispositivos(usuario_obj):
         if opcion == '1':
             nombre_disp = input("Nombre del dispositivo: ")
             tipo_disp = input("Tipo (luz, termostato, camara, electrodomestico): ")
-            dispositivos.agregar_dispositivo(lista_dispositivos, nombre_disp, tipo_disp)
+            nuevo_disp = dispositivos.agregar_dispositivo(lista_dispositivos, nombre_disp, tipo_disp)
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT OR IGNORE INTO Dispositivo (nombre_dispositivo, tipo, estado) VALUES (?, ?, ?)",
+                (nuevo_disp.nombre, nuevo_disp.tipo, nuevo_disp.estado)
+            )
+            cursor.execute(
+                "INSERT OR IGNORE INTO Gestion (email_usuario, nombre_dispositivo) VALUES (?, ?)",
+                (usuario_obj.email, nuevo_disp.nombre)
+            )
+            conn.commit()
+            conn.close()
 
         elif opcion == '2':
             dispositivos.listar_dispositivos(lista_dispositivos)
@@ -85,7 +98,24 @@ def menu_gestion_dispositivos(usuario_obj):
         elif opcion == '3':
             try:
                 dispositivo_id = int(input("ID del dispositivo a eliminar: "))
-                dispositivos.eliminar_dispositivo(lista_dispositivos, dispositivo_id)
+                disp_eliminado = None
+                for d in lista_dispositivos:
+                    if d.id == dispositivo_id:
+                        disp_eliminado = d
+                        break
+                if dispositivos.eliminar_dispositivo(lista_dispositivos, dispositivo_id) and disp_eliminado:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "DELETE FROM Gestion WHERE email_usuario=? AND nombre_dispositivo=?",
+                        (usuario_obj.email, disp_eliminado.nombre)
+                    )
+                    cursor.execute(
+                        "DELETE FROM Dispositivo WHERE nombre_dispositivo=?",
+                        (disp_eliminado.nombre,)
+                    )
+                    conn.commit()
+                    conn.close()
             except ValueError:
                 print(" Entrada inválida. El ID debe ser un número.")
 
@@ -95,6 +125,20 @@ def menu_gestion_dispositivos(usuario_obj):
                 nuevo_estado = input("Nuevo estado (encendido/apagado): ").lower()
                 if nuevo_estado in ['encendido', 'apagado']:
                     dispositivos.cambiar_estado(lista_dispositivos, dispositivo_id, nuevo_estado)
+                    disp_actualizado = None
+                    for d in lista_dispositivos:
+                        if d.id == dispositivo_id:
+                            disp_actualizado = d
+                            break
+                    if disp_actualizado:
+                        conn = get_connection()
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            "UPDATE Dispositivo SET estado=? WHERE nombre_dispositivo=?",
+                            (disp_actualizado.estado, disp_actualizado.nombre)
+                        )
+                        conn.commit()
+                        conn.close()
                 else:
                     print(" Estado inválido. Usa 'encendido' o 'apagado'.")
             except ValueError:
@@ -106,216 +150,37 @@ def menu_gestion_dispositivos(usuario_obj):
             print(" Opción inválida. Inténtalo de nuevo.")
 
 
+# --- MENÚ PRINCIPAL ---
 
+def menu_principal(gestor):
+    while True:
+        print("\n--- Menú Principal ---")
+        print("1. Iniciar sesión")
+        print("2. Registrar usuario")
+        print("0. Salir")
+        opcion = input("Elige una opción: ")
 
+        if opcion == "1":
+            nombre = input("Usuario: ")
+            passw = input("Contraseña: ")
+            usuario_obj = gestor.iniciar_sesion(nombre, passw)
+            if usuario_obj:
+                if usuario_obj.rol == "admin":
+                    menu_admin(usuario_obj, gestor)
+                else:
+                    menu_estandar(usuario_obj)
 
+        elif opcion == "2":
+            nombre = input("Nombre: ")
+            email = input("Email: ")
+            passw = input("Contraseña: ")
+            rol = input("Rol ('admin' o 'estandar'): ").lower()
 
+            # Guardar usuario en gestor y DB
+            gestor.registrar_usuario(nombre, passw, rol)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def mostrar_menu_principal():
-#     """Muestra el menú principal de la aplicación."""
-#     while True:
-#         print("\n--- Menú Principal ---")
-#         print("A. Registrar usuario estándar")
-#         print("B. Registrar usuario admin")
-#         print("1. Iniciar sesión")
-#         print("2. Gestionar Dispositivos (Acceso General)")
-#         print("3. Activar modo noche")
-#         print("4. Soporte")
-#         print("0. Salir")
-
-#         opcion = input("Seleccione una opción: ").upper()
-
-#         if opcion == "A":
-#             nombre = input("Ingrese su nombre de usuario: ")
-#             contrasena = input("Ingrese su contraseña: ")
-#             usuario.registrar_usuario(nombre, contrasena, rol="estandar")
-
-#         elif opcion == "B":
-#             nombre = input("Ingrese su nombre de usuario admin: ")
-#             contrasena = input("Ingrese su contraseña: ")
-#             usuario.registrar_usuario(nombre, contrasena, rol="admin")
-
-#         elif opcion == "1":
-#             nombre = input("Usuario: ")
-#             contrasena = input("Contraseña: ")
-#             datos = usuario.iniciar_sesion(nombre, contrasena)
-#             if datos:  # Si el login fue exitoso
-#                 if datos["rol"] == "admin":
-#                     mostrar_menu_admin_principal(nombre)
-#                 else:
-#                     mostrar_menu_usuario_estandar(nombre)
-
-#         elif opcion == "2":
-#             mostrar_menu_gestion_dispositivos_general()
-
-#         elif opcion == "3":
-#             # Para el modo noche general en el menú principal, pedimos usuario
-#             nombre_usuario = input("Ingrese su nombre de usuario para activar Modo Noche: ")
-#             automatizaciones.modo_noche(nombre_usuario)
-
-#         elif opcion == "4":
-#             import soporte
-#             soporte.mostrar_ayuda()
-
-#         elif opcion == "0":
-#             print("Saliendo de la aplicación...")
-#             break
-
-#         else:
-#             print("Opción inválida. Intente nuevamente.")
-
-
-# def mostrar_menu_admin_principal(nombre_usuario):
-#     """Muestra el menú principal para administradores."""
-#     while True:
-#         print("\n--- Menú Principal - Admin ---")
-#         print("A) Consultar automatizaciones activas")
-#         print("B) Gestionar dispositivos")
-#         print("C) Modificar rol de usuario")
-#         print("D) Ver usuarios registrados")
-#         print("0) Volver al menú principal")
-
-#         opcion = input("Seleccione una opción: ").upper()
-
-#         if opcion == "A":
-#             print("\nAutomatizaciones activas:")
-#             # Modo noche para el admin actual
-#             automatizaciones.modo_noche(nombre_usuario)
-
-#         elif opcion == "B":
-#             mostrar_menu_gestion_dispositivos_admin(nombre_usuario)
-
-#         elif opcion == "C":
-#             nombre = input("Usuario a modificar: ")
-#             nuevo_rol = input("Nuevo rol: ")
-#             usuario.modificar_rol_usuario(nombre, nuevo_rol)
-
-#         elif opcion == "D":
-#             usuario.mostrar_usuarios()
-
-#         elif opcion == "0":
-#             print("Volviendo al menú principal.")
-#             break
-
-#         else:
-#             print("Opción no válida. Intente nuevamente.")
-
-
-# def mostrar_menu_gestion_dispositivos_admin(nombre_usuario):
-#     """Muestra el menú de gestión de dispositivos para administradores."""
-#     while True:
-#         print("\n--- Gestión de Dispositivos (Admin) ---")
-#         print("1. Agregar dispositivo")
-#         print("2. Eliminar dispositivo")
-#         print("3. Listar dispositivos")
-#         print("4. Buscar dispositivo")
-#         print("5. Cambiar estado de dispositivo")
-#         print("6. Ver estado de dispositivo")
-#         print("0. Volver al menú anterior")
-
-#         opcion = input("Seleccione una opcion: ")
-#         if opcion == "1":
-#             nombre_disp = input("Nombre del dispositivo: ")
-#             tipo = input("Tipo de dispositivo (luz, cámara, electrodoméstico): ")
-#             estado = input("Estado inicial (encendido/apagado): ")
-#             dispositivos.agregar_dispositivo(nombre_usuario, nombre_disp, tipo, estado)
-#         elif opcion == "2":
-#             try:
-#                 disp_id = int(input("ID del dispositivo a eliminar: "))
-#                 dispositivos.eliminar_dispositivo(nombre_usuario, disp_id)
-#             except ValueError:
-#                 print("ID inválido.")
-#         elif opcion == "3":
-#             dispositivos.listar_dispositivos(nombre_usuario)
-#         elif opcion == "4":
-#             nombre_disp = input("Nombre del dispositivo a buscar: ")
-#             dispositivos.buscar_dispositivo(nombre_usuario, nombre_disp)
-#         elif opcion == "5":
-#             try:
-#                 disp_id = int(input("ID del dispositivo: "))
-#                 nuevo_estado = input("Nuevo estado (encendido/apagado): ").lower()
-#                 dispositivos.cambiar_estado(nombre_usuario, disp_id, nuevo_estado)
-#             except ValueError:
-#                 print("ID inválido.")
-#         elif opcion == "6":
-#             nombre_disp = input("Nombre del dispositivo: ")
-#             dispositivos.ver_estado(nombre_usuario, nombre_disp)
-#         elif opcion == "0":
-#             break
-#         else:
-#             print("Opción no válida.")
-
-
-# def mostrar_menu_gestion_dispositivos_general():
-#     """Muestra un menú de gestión de dispositivos más limitado para usuarios generales."""
-#     while True:
-#         print("\n--- Gestión de Dispositivos (General) ---")
-#         print("1. Listar dispositivos")
-#         print("2. Ver estado de dispositivo")
-#         print("0. Volver al menú anterior")
-
-#         opcion = input("Seleccione una opcion: ")
-#         if opcion == "1":
-#             nombre_usuario = input("Ingrese su nombre de usuario: ")
-#             dispositivos.listar_dispositivos(nombre_usuario)
-#         elif opcion == "2":
-#             nombre_usuario = input("Ingrese su nombre de usuario: ")
-#             nombre_disp = input("Nombre del dispositivo: ")
-#             dispositivos.ver_estado(nombre_usuario, nombre_disp)
-#         elif opcion == "0":
-#             break
-#         else:
-#             print("Opción no válida.")
-
-
-# def mostrar_menu_usuario_estandar(nombre_usuario):
-#     """Muestra el menú para usuarios estándar."""
-#     while True:
-#         print(f"\n--- Menú Usuario Estándar ({nombre_usuario}) ---")
-#         print("1. Consultar mis datos")
-#         print("2. Ejecutar automatización (Modo Noche)")
-#         print("3. Consultar estado de un dispositivo")
-#         print("0. Cerrar sesión")
-
-#         opcion = input("Seleccione una opción: ")
-
-#         if opcion == "1":
-#             usuario.consultar_datos_personales(nombre_usuario)
-#         elif opcion == "2":
-#             automatizaciones.modo_noche(nombre_usuario)
-#         elif opcion == "3":
-#             nombre_usuario = input("Ingrese su nombre de usuario: ")
-#             nombre_disp = input("Nombre del dispositivo: ")
-#             dispositivos.ver_estado(nombre_usuario, nombre_disp)
-#         elif opcion == "0":
-#             print("Cerrando sesión del usuario estándar.")
-#             break
-#         else:
-#             print("Opción inválida.")
-
-
-
+        elif opcion == "0":
+            print("Saliendo...")
+            break
+        else:
+            print("Opción inválida.")

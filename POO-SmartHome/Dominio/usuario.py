@@ -1,41 +1,54 @@
-# usuario.py
+from connection import get_connection
 
 class Usuario:
-    def __init__(self, nombre, contrasena, rol):
+    def __init__(self, nombre, passw, rol, email=None):
         self.nombre = nombre
-        self.contrasena = contrasena
+        self.passw = passw
         self.rol = rol
         self.dispositivos = []
+        self.email = email if email else f"{nombre}@smarthome.com"
 
     def consultar_datos_personales(self):
-        """Consultar los datos personales de este usuario."""
         print(f"\nDatos de {self.nombre}:")
         print(f"- Rol: {self.rol}")
         print(f"- Dispositivos registrados: {len(self.dispositivos)}")
 
     def modificar_rol(self, nuevo_rol):
-        """Modificar el rol de este usuario."""
         self.rol = nuevo_rol
         print(f"Rol de {self.nombre} modificado a {nuevo_rol}.")
+        # Persistir en DB
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE Usuario SET rol=? WHERE email=?", (nuevo_rol, self.email))
+        conn.commit()
+        conn.close()
 
 
 class GestorUsuarios:
-    """Clase que gestiona todos los usuarios."""
     def __init__(self):
-        self.usuarios = {}  # diccionario {nombre: objeto Usuario}
+        self.usuarios = {}
 
-    def registrar_usuario(self, nombre, contrasena, rol):
+    def registrar_usuario(self, nombre, passw, rol, apellido=""):
         if nombre in self.usuarios:
             print("Ya existe un usuario con ese nombre.")
         else:
-            usuario = Usuario(nombre, contrasena, rol)
+            usuario = Usuario(nombre, passw, rol)
             self.usuarios[nombre] = usuario
             print(f"Usuario {nombre} registrado con éxito como {rol}.")
-            
 
-    def iniciar_sesion(self, nombre, contrasena):
+            # Guardar en DB
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO Usuario (email, nombre, apellido, passw, rol) VALUES (?, ?, ?, ?, ?)",
+                (usuario.email, nombre, apellido, passw, rol)
+            )
+            conn.commit()
+            conn.close()
+
+    def iniciar_sesion(self, nombre, passw):
         usuario = self.usuarios.get(nombre)
-        if usuario and usuario.contrasena == contrasena:
+        if usuario and usuario.passw == passw:
             print(f"Inicio de sesión exitoso. Bienvenido, {nombre}.")
             return usuario
         else:

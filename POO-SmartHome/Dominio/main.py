@@ -1,45 +1,46 @@
-from usuario import GestorUsuarios
-import menu_manager
+# main.py
 
-gestor = GestorUsuarios()  # Gestor de todos los usuarios
+from menu_manager import menu_principal
+from usuario import GestorUsuarios, Usuario
+from connection import get_connection
 
+gestor = GestorUsuarios()
 
-def main():
-    while True:
-        print("\n--- SmartHome Solutions ---")
-        print("1. Registrarse como estándar")
-        print("2. Registrarse como administrador")
-        print("3. Iniciar Sesión")
-        print("4. Salir")
-        opcion = input("Elige una opción: ")
+def cargar_usuarios_desde_db():
+    """
+    Carga los usuarios y sus dispositivos desde la base de datos al gestor en memoria.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
 
-        if opcion == '1':
-            nombre = input("Ingresa tu nombre de usuario: ")
-            contrasena = input("Ingresa tu contraseña: ")
-            gestor.registrar_usuario(nombre, contrasena, rol='estandar')
+    # Cargar usuarios
+    cursor.execute("SELECT email, nombre, apellido, passw, rol FROM Usuario")
+    usuarios_db = cursor.fetchall()
+    for email, nombre, apellido, passw, rol in usuarios_db:
+        usuario_obj = Usuario(nombre, passw, rol)
+        usuario_obj.email = email  # Guardamos el email como atributo
+        gestor.usuarios[nombre] = usuario_obj
 
-        elif opcion == '2':
-            nombre_admin = input("Ingresa tu nombre de usuario: ")
-            contrasena = input("Ingresa tu contraseña: ")
-            gestor.registrar_usuario(nombre_admin, contrasena, rol='admin')
+    # Cargar dispositivos y relaciones
+    cursor.execute("""
+        SELECT g.email_usuario, d.nombre_dispositivo, d.tipo, d.estado
+        FROM Gestion g
+        JOIN Dispositivo d ON g.nombre_dispositivo = d.nombre_dispositivo
+    """)
+    relaciones = cursor.fetchall()
+    for email_usuario, nombre_disp, tipo_disp, estado in relaciones:
+        # Buscar usuario en memoria
+        for usuario_obj in gestor.usuarios.values():
+            if getattr(usuario_obj, "email", None) == email_usuario:
+                # Crear dispositivo en memoria
+                from dispositivos import agregar_dispositivo
+                disp_obj = agregar_dispositivo(usuario_obj.dispositivos, nombre_disp, tipo_disp, estado)
+                break
 
-        elif opcion == '3':
-            nombre = input("Ingresa tu nombre de usuario: ")
-            contrasena = input("Ingresa tu contraseña: ")
-            usuario_obj = gestor.iniciar_sesion(nombre, contrasena)
-
-            if usuario_obj:
-                if usuario_obj.rol == 'admin':
-                    menu_manager.menu_admin(usuario_obj)
-                else:
-                    menu_manager.menu_estandar(usuario_obj)
-
-        elif opcion == '4':
-            print(" ¡Hasta luego!")
-            break
-        else:
-            print(" Opción inválida. Inténtalo de nuevo.")
-
+    conn.close()
 
 if __name__ == "__main__":
-    main()
+    # Cargar datos de la base al iniciar
+    cargar_usuarios_desde_db()
+    # Ejecutar menú principal
+    menu_principal(gestor)
