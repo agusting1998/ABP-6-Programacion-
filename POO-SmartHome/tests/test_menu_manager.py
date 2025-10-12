@@ -1,68 +1,81 @@
-# import unittest
-# from unittest.mock import patch, MagicMock
-# import sys
-# import os
+import unittest
+import sys
+import os
+from unittest.mock import patch
+import io
 
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Dominio')))
 
-# import menu_manager
+import menu_manager
+import dispositivos
 
+class MockUsuario:
+    def __init__(self, nombre, rol='estandar'):
+        self.nombre = nombre
+        self.rol = rol
+        self.dispositivos = []
+        self.datos_consultados = False
+        self.rol_modificado = None
 
-# class TestMenuManager(unittest.TestCase):
+    def consultar_datos_personales(self):
+        self.datos_consultados = True
+        print(f"{self.nombre}: datos consultados")
 
-#     @patch("builtins.input", side_effect=["0"])  # Simula que el usuario elige salir
-#     @patch("builtins.print")
-#     def test_mostrar_menu_principal_salir(self, mock_print, mock_input):
-#         menu_manager.mostrar_menu_principal()
-#         # Verificamos que se haya mostrado el mensaje de salida
-#         mock_print.assert_any_call("Saliendo de la aplicación...")
-
-#     @patch("menu_manager.usuario.registrar_usuario")
-#     @patch("builtins.input", side_effect=["A", "Juan", "1234", "0"])  # Opción A -> registrar usuario estándar -> salir
-#     @patch("builtins.print")
-#     def test_registrar_usuario_estandar(self, mock_print, mock_input, mock_registrar):
-#         menu_manager.mostrar_menu_principal()
-#         mock_registrar.assert_called_once_with("Juan", "1234", rol="estandar")
-
-#     @patch("menu_manager.usuario.registrar_usuario")
-#     @patch("builtins.input", side_effect=["B", "Admin", "abcd", "0"])  # Opción B -> registrar admin -> salir
-#     @patch("builtins.print")
-#     def test_registrar_usuario_admin(self, mock_print, mock_input, mock_registrar):
-#         menu_manager.mostrar_menu_principal()
-#         mock_registrar.assert_called_once_with("Admin", "abcd", rol="admin")
-
-#     @patch("menu_manager.usuario.iniciar_sesion")
-#     @patch("menu_manager.mostrar_menu_usuario_estandar")
-#     @patch("builtins.input", side_effect=["1", "user", "pass", "0"])  # login como usuario estandar
-#     @patch("builtins.print")
-#     def test_login_usuario_estandar(self, mock_print, mock_input, mock_menu_estandar, mock_login):
-#         mock_login.return_value = {"rol": "estandar"}
-#         menu_manager.mostrar_menu_principal()
-#         mock_menu_estandar.assert_called_once_with("user")
-
-#     @patch("menu_manager.usuario.iniciar_sesion")
-#     @patch("menu_manager.mostrar_menu_admin_principal")
-#     @patch("builtins.input", side_effect=["1", "admin", "clave", "0"])  # login como admin
-#     @patch("builtins.print")
-#     def test_login_usuario_admin(self, mock_print, mock_input, mock_menu_admin, mock_login):
-#         mock_login.return_value = {"rol": "admin"}
-#         menu_manager.mostrar_menu_principal()
-#         mock_menu_admin.assert_called_once_with("admin")
-
-#     @patch("menu_manager.automatizaciones.modo_noche")
-#     @patch("builtins.input", side_effect=["3", "usuarioX", "0"])  # Activa modo noche
-#     @patch("builtins.print")
-#     def test_modo_noche(self, mock_print, mock_input, mock_modo_noche):
-#         menu_manager.mostrar_menu_principal()
-#         mock_modo_noche.assert_called_once_with("usuarioX")
-
-#     @patch("menu_manager.soporte.mostrar_ayuda")
-#     @patch("builtins.input", side_effect=["4", "0"])  # Soporte
-#     @patch("builtins.print")
-#     def test_soporte(self, mock_print, mock_input, mock_ayuda):
-#         menu_manager.mostrar_menu_principal()
-#         mock_ayuda.assert_called_once()
+    def modificar_rol(self, nuevo_rol):
+        self.rol_modificado = nuevo_rol
+        print(f"{self.nombre}: rol cambiado a {nuevo_rol}")
 
 
-# if __name__ == "__main__":
-#     unittest.main()
+class TestMenuManager(unittest.TestCase):
+
+    def test_menu_estandar_consulta_datos(self):
+        user = MockUsuario("Juan")
+        with patch('builtins.input', side_effect=['1','4']), \
+             patch('sys.stdout', new_callable=io.StringIO) as fake_out:
+            menu_manager.menu_estandar(user)
+        
+        output = fake_out.getvalue()
+        self.assertIn("datos consultados", output)
+        self.assertTrue(user.datos_consultados)
+        self.assertIn("--- Menú de Usuario Estándar (Juan) ---", output)
+
+    def test_menu_estandar_opcion_invalida(self):
+        user = MockUsuario("Ana")
+        with patch('builtins.input', side_effect=['99','4']), \
+             patch('sys.stdout', new_callable=io.StringIO) as fake_out:
+            menu_manager.menu_estandar(user)
+        
+        output = fake_out.getvalue()
+        self.assertIn("Opción inválida", output)
+
+    def test_menu_admin_modificar_rol_usuario_existente(self):
+        admin_user = MockUsuario("Admin", rol='admin')
+        # Creamos un mock del gestor de usuarios
+        gestor_mock = type('Gestor', (), {})()
+        gestor_mock.usuarios = {"Carlos": MockUsuario("Carlos")}
+        menu_manager.gestor = gestor_mock
+
+        with patch('builtins.input', side_effect=['3', 'Carlos', 'admin', '4']), \
+             patch('sys.stdout', new_callable=io.StringIO) as fake_out:
+            menu_manager.menu_admin(admin_user)
+
+        output = fake_out.getvalue()
+        self.assertIn("rol cambiado a admin", output)
+        self.assertEqual(gestor_mock.usuarios["Carlos"].rol_modificado, 'admin')
+
+    def test_menu_admin_opcion_invalida(self):
+        admin_user = MockUsuario("Admin", rol='admin')
+        gestor_mock = type('Gestor', (), {})()
+        gestor_mock.usuarios = {}
+        menu_manager.gestor = gestor_mock
+
+        with patch('builtins.input', side_effect=['99','4']), \
+             patch('sys.stdout', new_callable=io.StringIO) as fake_out:
+            menu_manager.menu_admin(admin_user)
+
+        output = fake_out.getvalue()
+        self.assertIn("Opción inválida", output)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
