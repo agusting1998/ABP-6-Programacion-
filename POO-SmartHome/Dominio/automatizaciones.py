@@ -11,8 +11,9 @@ class ControlAutomatizaciones:
         for disp in usuario_obj.dispositivos:
             if disp.tipo in ['luz', 'electrodomestico']:
                 if disp.estado == 'encendido':
-                    disp.cambiar_estado('apagado')
+                    disp.estado = 'apagado'
                     dispositivos_apagados += 1
+
         # Guardar activación en DB
         self.guardar_activacion(usuario_obj.email, "Modo Ahorro de Energía")
         print(f"\n Modo Ahorro de Energía activado. {dispositivos_apagados} dispositivos apagados.\n")
@@ -21,9 +22,10 @@ class ControlAutomatizaciones:
         print("\n Activando Modo Noche...")
         for disp in usuario_obj.dispositivos:
             if disp.tipo in ['luz', 'electrodomestico']:
-                disp.cambiar_estado('apagado')
+                disp.estado = 'apagado'
             elif disp.tipo == 'cámara':
-                disp.cambiar_estado('encendido')
+                disp.estado = 'encendido'
+
         # Guardar activación en DB
         self.guardar_activacion(usuario_obj.email, "Modo Noche")
         print("Modo Noche activado.\n")
@@ -32,13 +34,16 @@ class ControlAutomatizaciones:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO Activacion (email_usuario, nombre_automatizacion, fecha_activacion) VALUES (?, ?, ?)",
+            "INSERT INTO Activacion (email_usuario, nombre_automatizacion, fecha_activacion) VALUES (%s, %s, %s)",
             (email_usuario, nombre_automatizacion, datetime.now())
         )
         conn.commit()
         conn.close()
 
+
+# 👇 Esta variable es la que pide tu menu_manager.py
 control_automatizaciones = ControlAutomatizaciones()
+
 
 def consultar_automatizaciones_activas():
     print("\n--- Automatizaciones Disponibles ---")
