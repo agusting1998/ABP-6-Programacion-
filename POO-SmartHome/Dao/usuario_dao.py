@@ -2,9 +2,9 @@ import os
 import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.parent / "Dominio"))
-
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Conn'))
 from usuario import Usuario
-from connection import get_connection
+from db_conn import get_connection
 
 class UsuarioDAO:
     def agregar(self, usuario_obj: Usuario):
