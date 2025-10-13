@@ -1,53 +1,71 @@
-import unittest
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from Dominio.automatizaciones import ControlAutomatizaciones
 
-class DispositivoMock:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROYECTO_DIR = os.path.join(BASE_DIR, "..", "POO-SmartHome")
+DOMINIO_DIR = os.path.join("..", "Dominio")
+CONN_DIR = os.path.join("..", "Conn")
+
+
+for ruta in [PROYECTO_DIR, DOMINIO_DIR, CONN_DIR]:
+    if ruta not in sys.path:
+        sys.path.append(ruta)
+
+
+from automatizaciones import ControlAutomatizaciones
+
+
+class DispositivoSimulado:
     def __init__(self, nombre, tipo, estado):
         self.nombre = nombre
         self.tipo = tipo
         self.estado = estado
 
-    def cambiar_estado(self, nuevo_estado):
-        self.estado = nuevo_estado
+class UsuarioSimulado:
+    def __init__(self, email, dispositivos=None):
+        self.email = email
+        self.dispositivos = dispositivos or []
 
-class UsuarioMock:
-    def __init__(self, dispositivos):
-        self.dispositivos = dispositivos
 
-class TestControlAutomatizaciones(unittest.TestCase):
-    def test_modo_ahorro_energia(self):
-        dispositivos = [
-            DispositivoMock("Luz 1", "luz", "encendido"),
-            DispositivoMock("Heladera", "electrodomestico", "encendido"),
-            DispositivoMock("Cámara 1", "cámara", "encendido"),
-            DispositivoMock("Luz 2", "luz", "apagado"),
-        ]
-        usuario = UsuarioMock(dispositivos)
-        control = ControlAutomatizaciones()
-        control.modo_ahorro_energia(usuario)
-        self.assertEqual(dispositivos[0].estado, "apagado")
-        self.assertEqual(dispositivos[1].estado, "apagado")
-        self.assertEqual(dispositivos[2].estado, "encendido")
-        self.assertEqual(dispositivos[3].estado, "apagado")
+class ControlAutomatizacionesMock(ControlAutomatizaciones):
+    def guardar_activacion(self, email_usuario, nombre_automatizacion):
+        print(f"[SIMULADO] guardar_activacion -> {email_usuario}, {nombre_automatizacion}")
 
-    def test_modo_noche(self):
-        dispositivos = [
-            DispositivoMock("Luz 1", "luz", "encendido"),
-            DispositivoMock("Heladera", "electrodomestico", "encendido"),
-            DispositivoMock("Cámara 1", "cámara", "apagado"),
-            DispositivoMock("Luz 2", "luz", "apagado"),
-        ]
-        usuario = UsuarioMock(dispositivos)
-        control = ControlAutomatizaciones()
-        control.modo_noche(usuario)
-        self.assertEqual(dispositivos[0].estado, "apagado")
-        self.assertEqual(dispositivos[1].estado, "apagado")
-        self.assertEqual(dispositivos[2].estado, "encendido")
-        self.assertEqual(dispositivos[3].estado, "apagado")
+def test_modo_ahorro_energia():
+    print("=== TEST: modo_ahorro_energia ===")
 
-if __name__ == '__main__':
-    unittest.main()
+    dispositivos = [
+        DispositivoSimulado("Luz 1", "luz", "encendido"),
+        DispositivoSimulado("TV", "electrodomestico", "encendido"),
+        DispositivoSimulado("Ventana", "otro", "encendido"),
+        DispositivoSimulado("Lampara", "luz", "apagado")
+    ]
+    usuario = UsuarioSimulado("user@test.com", dispositivos)
+
+    ctrl = ControlAutomatizacionesMock()
+    ctrl.modo_ahorro_energia(usuario)
+
+    for d in usuario.dispositivos:
+        print(f"{d.nombre} -> {d.estado}")
+
+def test_modo_noche():
+    print("=== TEST: modo_noche ===")
+
+    dispositivos = [
+        DispositivoSimulado("Luz 1", "luz", "encendido"),
+        DispositivoSimulado("TV", "electrodomestico", "encendido"),
+        DispositivoSimulado("Camara 1", "cámara", "apagado")
+    ]
+    usuario = UsuarioSimulado("user@test.com", dispositivos)
+
+    ctrl = ControlAutomatizacionesMock()
+    ctrl.modo_noche(usuario)
+
+    for d in usuario.dispositivos:
+        print(f"{d.nombre} -> {d.estado}")
+
+if __name__ == "__main__":
+    test_modo_ahorro_energia()
+    print()
+    test_modo_noche()

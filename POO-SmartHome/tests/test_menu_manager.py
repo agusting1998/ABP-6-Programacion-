@@ -4,11 +4,13 @@ import os
 from unittest.mock import patch
 import io
 
+# Ajuste de ruta para importar menu_manager
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Dominio')))
 
 import menu_manager
 import dispositivos
 
+# === Mock de usuario ===
 class MockUsuario:
     def __init__(self, nombre, rol='estandar'):
         self.nombre = nombre
@@ -25,7 +27,7 @@ class MockUsuario:
         self.rol_modificado = nuevo_rol
         print(f"{self.nombre}: rol cambiado a {nuevo_rol}")
 
-
+# === Tests ===
 class TestMenuManager(unittest.TestCase):
 
     def test_menu_estandar_consulta_datos(self):
@@ -37,7 +39,8 @@ class TestMenuManager(unittest.TestCase):
         output = fake_out.getvalue()
         self.assertIn("datos consultados", output)
         self.assertTrue(user.datos_consultados)
-        self.assertIn("--- Menú de Usuario Estándar (Juan) ---", output)
+        # Coincide exactamente con el print real
+        self.assertIn(f"--- Menú Usuario Estándar ({user.nombre}) ---", output)
 
     def test_menu_estandar_opcion_invalida(self):
         user = MockUsuario("Ana")
@@ -50,7 +53,7 @@ class TestMenuManager(unittest.TestCase):
 
     def test_menu_admin_modificar_rol_usuario_existente(self):
         admin_user = MockUsuario("Admin", rol='admin')
-        # Creamos un mock del gestor de usuarios
+        # Mock del gestor de usuarios
         gestor_mock = type('Gestor', (), {})()
         gestor_mock.usuarios = {"Carlos": MockUsuario("Carlos")}
         menu_manager.gestor = gestor_mock
