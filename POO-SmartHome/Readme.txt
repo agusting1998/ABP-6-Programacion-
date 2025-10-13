@@ -4,11 +4,14 @@ Este documento describe la arquitectura del proyecto POO-SmartHome,
 centrandose en la Programacion Orientada a Objetos (POO) y su
 interaccion con la base de datos (persistencia).
 
-El proyecto se divide en dos directorios principales:
-- Dominio/: Contiene la logica de negocio (Clases y Funciones).
-- test/: Contiene las pruebas unitarias (Unit Tests).
+El proyecto se organiza en los siguientes directorios principales:
 
-1. DOMINIO (LOGICA POO Y PERSISTENCIA)
+* Dominio/: Contiene la logica de negocio (Clases y Funciones).
+* Dao/: Contiene las clases de acceso a datos (CRUD SQL).
+* Conn/: Contiene la configuracion de la conexion a la base de datos.
+* test/: Contiene las pruebas unitarias (Unit Tests).
+
+1. DOMINIO (LOGICA POO Y REGLAS DEL SISTEMA)
 
 El directorio Dominio/ encapsula la logica de negocio a traves
 de clases que representan los conceptos clave del Hogar Inteligente.
@@ -16,62 +19,86 @@ de clases que representan los conceptos clave del Hogar Inteligente.
 1.1. usuario.py (Clases Usuario y GestorUsuarios)
 
 CLASE USUARIO:
-  Es la Entidad principal. Representa a un usuario individual (estandar o admin).
-  ATRIBUTOS: nombre, passw, rol, email.
-  METODOS: consultar_datos_personales(), modificar_rol().
+Es la Entidad principal. Representa a un usuario individual (estandar o admin).
+ATRIBUTOS: nombre, passw, rol, email.
+METODOS: consultar_datos_personales(), modificar_rol().
 
 CLASE GESTORUSUARIOS:
-  Es una clase Control/Manager. Administra la coleccion de objetos Usuario.
-  METODOS: registrar_usuario(), iniciar_sesion(). Ambos interactuan con la tabla Usuario de la BD.
+Es una clase Control/Manager. Administra la coleccion de objetos Usuario.
+METODOS: registrar_usuario(), iniciar_sesion(). Para la persistencia,
+delega las operaciones a usuario_dao.py (en el directorio Dao/).
 
 1.2. dispositivos.py (Clases Dispositivo y LuzInteligente)
 
 CLASE DISPOSITIVO:
-  Es la Entidad base. Clase base para todos los aparatos del hogar.
-  ATRIBUTOS: nombre, tipo, estado.
-  ABSTRACCION: Usa un contador estatico para asignar IDs unicos a cada objeto en memoria.
+Es la Entidad base. Clase padre para todos los aparatos del hogar.
+ATRIBUTOS: nombre, tipo, estado.
+ABSTRACCION: Usa un contador estatico para asignar IDs unicos en memoria.
 
 CLASE LUZINTELIGENTE (HERENCIA):
-  Es una Entidad especializada. Extiende Dispositivo para manejar las propiedades especificas de una luz (ej. brillo).
-  RELACION: Hereda de Dispositivo (LuzInteligente es un Dispositivo).
+Es una Entidad especializada. Extiende Dispositivo para manejar las propiedades
+especificas de una luz (ej. brillo).
+RELACION: Hereda de Dispositivo (LuzInteligente es un Dispositivo).
 
-FUNCIONES DE MODULO:
-  El modulo utiliza funciones (ej. agregar_dispositivo, listar_dispositivos, eliminar_dispositivo) para la mayoria de las operaciones de persistencia (INSERT, SELECT, DELETE en las tablas Dispositivo y Gestion).
+Persistencia:
+Las funciones o acciones relacionadas se delegan a dispositivo_dao.py
+(en el directorio Dao/) para realizar operaciones INSERT, SELECT, DELETE, etc.
 
 1.3. automatizaciones.py (Clase ControlAutomatizaciones)
 
 CLASE CONTROLAUTOMATIZACIONES:
-  Es una clase Control/Servicio. Ejecuta rutinas predefinidas que afectan a multiples dispositivos.
-  METODOS: modo_ahorro_energia(), modo_noche(), guardar_activacion().
-  LOGICA POO: Delega la modificacion de estado a los objetos Dispositivo dentro de la coleccion que posee el objeto Usuario. Registra la activacion en la tabla Activacion.
+Es una clase Control/Servicio. Ejecuta rutinas que afectan a multiples dispositivos.
+METODOS: modo_ahorro_energia(), modo_noche(), guardar_activacion().
+LOGICA POO: Modifica objetos Dispositivo y registra la activacion mediante
+automatizacion_dao.py (en Dao/).
 
-1.4. connection.py (Persistencia)
+1.4. menu_manager.py y soporte.py
 
-RESPONSABILIDAD: Gestiona la conexion y comunicacion con la base de datos MySQL.
-FUNCION GET_CONNECTION(): Encapsula los detalles de conexion (host, user, passw, database) y maneja la deteccion de errores. Permite la persistencia en todo el Dominio.
+MENU_MANAGER.PY:
+Responsable de la Interfaz de Usuario (UI) por consola. Orquesta las clases del Dominio
+y llama a los DAO segun sea necesario.
 
-1.5. main.py / menu_manager.py / soporte.py
+SOPORTE.PY:
+Contiene funciones utilitarias (validar_estado, mostrar_ayuda), separando la logica
+auxiliar de la logica principal.
 
-MAIN.PY: Punto de entrada.
-MENU_MANAGER.PY: Responsable de la Interfaz de Usuario (UI). Une las clases del Dominio en respuesta a la interaccion del usuario.
-SOPORTE.PY: Contiene funciones utilitarias (validar_estado, mostrar_ayuda), separando la logica de soporte de la logica principal.
+2. DAO (PERSISTENCIA Y CRUD)
 
-2. TESTS (PRUEBAS UNITARIAS)
+El directorio Dao/ contiene los modulos que realizan operaciones directas sobre la
+base de datos. Cada entidad cuenta con su propio archivo.
 
-El directorio test/ contiene pruebas que validan la logica interna de las
-clases del Dominio, utilizando la tecnica de Mocking para aislar el codigo.
+2.1. usuario_dao.py
+Maneja la tabla Usuario. Metodos tipicos: agregar(), buscar_por_email(), listar().
 
-2.1. TestControlAutomatizaciones
-  PROPOSITO: Asegurar que las rutinas de automatizacion modifiquen el estado de los dispositivos segun lo esperado (ej. Modo Noche apaga luces y enciende camaras).
-  MOCKING: Usa clases Mock (DispositivoMock, UsuarioMock) para simular el entorno sin conectarse a la BD.
+2.2. dispositivo_dao.py
+Maneja tablas relacionadas con Dispositivos. Metodos: insertar(), eliminar(), listar().
 
-2.2. TestClasesDispositivo (Logica POO)
-  PROPOSITO: Validar la correcta inicializacion, herencia y metodos de las clases Dispositivo y LuzInteligente.
-  PRUEBAS CLAVE: Verifica que LuzInteligente herede de Dispositivo y que sus metodos especializados (ej. cambiar estado afectando el brillo) funcionen correctamente.
+Todos estos modulos se conectan a la BD mediante la capa Conn/.
 
-2.3. TestFuncionesDispositivo (Logica de Persistencia)
-  PROPOSITO: Originalmente probaba funciones que operaban sobre listas. En la implementacion actual con SQL, se centraria en probar la interaccion con la BD. (Nota: Para un testing ideal, estas pruebas deberian simular las llamadas a la BD usando 'patch').
+3. CONN (CONEXION A LA BASE DE DATOS)
 
-2.4. TestMenuManager / TestSoporte / TestUsuario
-  PROPOSITO: Validar el flujo del menu, las funciones de utilidad y la gestion de usuarios.
-  MOCKING: Utiliza 'patch' para simular la entrada del usuario ('builtins.input') y capturar la salida en consola ('sys.stdout') para verificar que los mensajes y las acciones del menu sean correctas.
+El directorio Conn/ centraliza la configuracion y creacion de conexiones.
+
+3.1. db_conn.py
+Define funciones como get_connection() para conectar con MySQL
+(host, usuario, contraseña, base de datos).
+Es reutilizado por todos los archivos DAO.
+
+4. TESTS (PRUEBAS UNITARIAS)
+
+El directorio test/ contiene pruebas que validan la logica interna del Dominio
+y la correcta interaccion con los DAO utilizando mocks.
+
+4.1. TestAutomatizaciones
+PROPOSITO: Verificar que las rutinas modifiquen el estado de los dispositivos
+(ej. Modo Noche).
+MOCKING: Usa DispositivoMock, UsuarioMock.
+
+4.2. TestDispositivos (Logica POO)
+PROPOSITO: Validar herencia y comportamiento de Dispositivo y LuzInteligente.
+PRUEBAS: Se comprueba que los metodos especializados funcionen correctamente.
+
+4.4. TestMenuManager / TestSoporte / TestUsuario
+PROPOSITO: Verificar flujo del menu, funciones utilitarias y registro/inicio
+de sesion de usuarios.
+MOCKING: Se simula input() y se captura sys.stdout para chequear salidas.
