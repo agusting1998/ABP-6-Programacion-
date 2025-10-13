@@ -41,7 +41,7 @@ class ControlAutomatizaciones:
         conn.close()
 
 
-# 👇 Esta variable es la que pide tu menu_manager.py
+
 control_automatizaciones = ControlAutomatizaciones()
 
 
