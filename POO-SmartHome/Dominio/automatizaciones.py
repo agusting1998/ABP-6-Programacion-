@@ -9,13 +9,11 @@ class ControlAutomatizaciones:
         print("\nActivando Modo Ahorro de Energía...")
         dispositivos_apagados = 0
 
-        # Verifica que el usuario tenga dispositivos
         for disp in getattr(usuario_obj, "dispositivos", []):
             if disp.tipo in ['luz', 'electrodomestico'] and disp.estado == 'encendido':
                 disp.estado = 'apagado'
                 dispositivos_apagados += 1
 
-        # Guarda activación con nombre válido
         self.guardar_activacion(usuario_obj.email, "Modo_Ahorro_Energia")
         print(f"Modo Ahorro de Energía activado. {dispositivos_apagados} dispositivos apagados.\n")
 
@@ -28,7 +26,6 @@ class ControlAutomatizaciones:
             elif disp.tipo == 'cámara':
                 disp.estado = 'encendido'
 
-        # Guarda activación con nombre válido
         self.guardar_activacion(usuario_obj.email, "Modo_Noche")
         print("Modo Noche activado.\n")
 
@@ -37,13 +34,11 @@ class ControlAutomatizaciones:
             conn = get_connection()
             cursor = conn.cursor()
 
-            # Asegurar que la automatización exista en la tabla referenciada
             cursor.execute("""
                 INSERT IGNORE INTO automatizacion (nombre_automatizacion)
                 VALUES (%s)
             """, (nombre_automatizacion,))
 
-            # Guardar la activación
             cursor.execute(
                 "INSERT INTO Activacion (email_usuario, nombre_automatizacion, fecha_activacion) VALUES (%s, %s, %s)",
                 (email_usuario, nombre_automatizacion, datetime.now())

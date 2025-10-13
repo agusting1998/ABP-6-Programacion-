@@ -54,6 +54,8 @@ def menu_admin(usuario_obj):
                 print("Usuario no encontrado.")
         elif opcion == '4':
             break
+        else:
+            print("Opción inválida.") 
 
 def menu_gestion_dispositivos(usuario_obj):
     while True:
@@ -80,6 +82,8 @@ def menu_gestion_dispositivos(usuario_obj):
             eliminar_dispositivo(usuario_obj, nombre)
         elif opcion == '5':
             break
+        else:
+            print("Opción inválida.") 
 
 def menu_principal():
     while True:
@@ -113,6 +117,9 @@ def menu_principal():
 
         elif opcion == "0":
             break
+        
+        else:
+            print("Opción inválida.") 
 
 if __name__ == "__main__":
     menu_principal()
