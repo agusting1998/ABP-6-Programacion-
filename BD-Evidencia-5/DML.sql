@@ -1,6 +1,6 @@
 USE hogar_inteligente;
 
-INSERT INTO Usuario (email, nombre, apellido, contraseña, rol) VALUES
+INSERT INTO Usuario (email, nombre, apellido, passw, rol) VALUES
 ('yazmin@gmail.com', 'Yazmin', 'Orellana', 'pass123', 'admin'),
 ('diego@gmail.com', 'Diego', 'Mayo', 'pass456', 'admin'),
 ('matias@gmail.com', 'Matias', 'Aranda', 'pass789', 'admin'),

@@ -1,41 +1,103 @@
-Guía de Ejecución de Scripts SQL
-Este documento te guiará a través de los pasos necesarios para ejecutar los scripts DDL y DML de la base de datos hogar_inteligente usando MySQL Workbench o en One Compiler (el gestor de base de datos que utilizamos en el grupo).
+BASE DE DATOS: POO-SmartHome
+
+Este archivo documenta los scripts SQL para la base de datos
+del proyecto del Hogar Inteligente.
+
+Contiene:
+1. DDL.sql (Data Definition Language) - Estructura.
+2. DML.sql (Data Manipulation Language) - Datos de inicio.
+
+
+1. DDL.sql (Data Definition Language)
+
+
+DESCRIPCION:
+Define la estructura completa de la base de datos,
+incluyendo todas las tablas, columnas, claves primarias
+(PK) y claves foráneas (FK) que aseguran la integridad
+referencial.
+
+ESTRUCTURA DE TABLAS:
+
+* TABLA USUARIO:
+  - Almacena datos de acceso y roles (admin/usuario).
+  - PK: email
+
+* TABLA DISPOSITIVO:
+  - Almacena los aparatos físicos (luz, cámara, termostato).
+  - PK: nombre_dispositivo
+
+* TABLA AUTOMATIZACION:
+  - Define las rutinas o escenas (ej. "Modo Noche").
+  - PK: nombre_automatizacion
+
+* TABLA GESTION (Relación N:M):
+  - Define qué Usuario tiene control sobre qué Dispositivo.
+  - PK: (email_usuario, nombre_dispositivo)
+  - FKs: a Usuario y Dispositivo.
+
+* TABLA ACTIVACION (Relación N:M + Timestamp):
+  - Registra quién y cuándo activó una Automatización.
+  - PK: (email_usuario, nombre_automatizacion, fecha_activacion)
+  - FKs: a Usuario y Automatizacion.
+
+* TABLA CONTROL (Relación N:M):
+  - Define qué Dispositivo es afectado por una Automatizacion.
+  - PK: (nombre_automatizacion, nombre_dispositivo)
+  - FKs: a Automatizacion y Dispositivo.
+
+PASOS DE EJECUCION:
+1. CREAR la base de datos 'hogar_inteligente'.
+2. Crear las 6 tablas principales.
+3. Establecer las Claves Foráneas para asegurar las relaciones.
+
+
+2. DML.sql (Data Manipulation Language)
+
+
+DESCRIPCION:
+Inserta datos iniciales (datos semilla o 'seed data') para
+permitir la prueba inmediata del sistema. Estos datos
+simulan la configuración inicial del SmartHome.
+
+CONTENIDO DE LA INSERCION:
+
+* USUARIO: 5 registros (3 administradores y 2 usuarios normales).
+* DISPOSITIVO: 15 registros (luces, cámaras, electrodomésticos, etc.).
+* AUTOMATIZACION: 5 rutinas predefinidas.
+* GESTION: 8 asignaciones de dispositivos a usuarios.
+* ACTIVACION: 5 registros de activaciones históricas.
+* CONTROL: 10 relaciones que definen qué dispositivos son parte de las rutinas ("Modo Noche" y "Modo Día").
+
+COMO USAR ESTOS SCRIPTS:
+
+1. Conéctate a tu gestor de base de datos (MySQL/MariaDB).
+2. Ejecuta el contenido completo del archivo DDL.sql.
+3. Ejecuta el contenido completo del archivo DML.sql.
+
+La base de datos 'hogar_inteligente' estará lista para ser usada por la aplicación POO-SmartHome.
 
 
 
 
-a) Requisitos
-
-Tener acceso a una base de datos MySQL (ya sea local o en la nube).
-Tener instalado MySQL Workbench o una herramienta similar (por ejemplo, DBeaver, HeidiSQL).
+3. COMO EJECUTAR EN ONE COMPILER (O SIMILAR)
 
 
+Debido a que los compiladores SQL online como One Compiler
+(https://onecompiler.com/mysql) generalmente no permiten crear
+bases de datos (CREATE DATABASE) ni seleccionarlas (USE),
+debemos adaptar el script para que solo contenga la creacion
+de tablas, la insercion de datos y la verificacion final.
 
-b) Pasos para la Ejecución (MySQL Workbench)
+PASOS:
+1.  Abre un entorno de MySQL online (ej. One Compiler).
+2.  Copia y pega el **código SQL completo** de los archivos DML y DLL dentro de la carpeta "db-onecompiler"
+    (DDL + DML + SELECT) en el editor.
+3.  Presiona el boton "Run" o "Ejecutar".
 
-1. Ejecutar el Script DDL (Definición de Datos)
-El script ddl_script.sql es el que crea la estructura de la base de datos y todas sus tablas. Es crucial que este script se ejecute primero.
-
-Abre MySQL Workbench y conéctate a tu instancia de MySQL.
-Haz clic en File -> Open SQL Script... y selecciona el archivo ddl_script.sql.
-Una vez que el script esté abierto, haz clic en el botón de "ejecutar" (el icono del rayo) o presiona Ctrl + Shift + Enter.
-Si el script se ejecuta correctamente, verás un mensaje de éxito. Esto significa que la base de datos hogar_inteligente y todas sus tablas han sido creadas.
-
-2. Ejecutar el Script DML (Manipulación de Datos)
-El script dml_script.sql es el que llena la base de datos con los registros de prueba que hemos creado. Este script debe ejecutarse después del DDL para evitar errores.
-En MySQL Workbench, asegúrate de que estás conectado a la base de datos hogar_inteligente. Puedes hacerlo haciendo doble clic en el nombre de la base de datos en el panel del lado izquierdo.
-Haz clic en File -> Open SQL Script... y selecciona el archivo dml_script.sql.
-Una vez que el script esté abierto, haz clic en el botón de "ejecutar" (el icono del rayo) o presiona Ctrl + Shift + Enter.
-Si la ejecución es exitosa, todos los datos de prueba habrán sido insertados en las tablas.
-
-c) Aclaraciones en la ejecucion (OneCompiler)
-
-- Se adopta la herramienta de OneCompiler dado a que es la que mejor se adapta a la hora de ejecutar el codigo.
-- Se creo un directorio, con el codigo adaptado para esa plataforma.
-- En DLL, se hicieron cambios minimos como; eliminar CREATE DATABASE y USE, para su correcta ejecucion.
-- En DML, agregamos SELECT al final del codigo, para la correcta visualizacion de las tablas. 
-
-Nota Importante
-
-El script ddl_script.sql incluye la línea DROP DATABASE IF EXISTS hogar_inteligente; al inicio. Esto es para evitar errores de duplicados si lo ejecutas varias veces. Al ejecutar el DDL, la base de datos anterior se eliminará y se creará una nueva, permitiendo que el script DML se ejecute sin problemas.
+El resultado mostrara:
+a)  Mensajes de exito en la creacion de las 6 tablas.
+b)  Mensajes de exito en la insercion de todos los datos.
+c)  Las 6 tablas resultantes (Usuario, Dispositivo, etc.)
+    mediante las sentencias SELECT al final del script.
 
