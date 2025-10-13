@@ -1,11 +1,11 @@
 from connection import get_connection
 
 class Usuario:
-    def __init__(self, nombre, passw, rol, email=None):
+    def __init__(self, nombre, passw, rol, email):
         self.nombre = nombre
         self.passw = passw
         self.rol = rol
-        self.email = email if email else f"{nombre}@smarthome.com"
+        self.email = email
 
     def consultar_datos_personales(self):
         print(f"\nDatos de {self.nombre}:")
@@ -21,33 +21,30 @@ class Usuario:
         conn.close()
         print(f"Rol de {self.nombre} modificado a {nuevo_rol}.")
 
+
 class GestorUsuarios:
     def __init__(self):
         self.usuarios = {}
 
-    def registrar_usuario(self, nombre, passw, rol, email=None):
-        usuario = Usuario(nombre, passw, rol, email)
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO Usuario (email, nombre, passw, rol) VALUES (%s, %s, %s, %s)",
-            (usuario.email, nombre, passw, rol)
-        )
-        conn.commit()
-        conn.close()
-        self.usuarios[nombre] = usuario
-        print(f"Usuario {nombre} registrado como {rol}.")
+    def registrar_usuario(self, nombre, passw, rol, email):
 
-    def iniciar_sesion(self, nombre, passw):
+        if email in self.usuarios:
+            print("Error: El email ya existe en el sistema.")
+            return None
+        usuario = Usuario(nombre, passw, rol, email)
+        self.usuarios[email] = usuario
+        return usuario
+
+    def iniciar_sesion(self, email, passw):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre, passw, rol, email FROM Usuario WHERE nombre=%s", (nombre,))
+        cursor.execute("SELECT nombre, passw, rol, email FROM Usuario WHERE email=%s", (email,))
         row = cursor.fetchone()
         conn.close()
         if row and row[1] == passw:
             usuario_obj = Usuario(row[0], row[1], row[2], row[3])
-            self.usuarios[nombre] = usuario_obj
-            print(f"Bienvenido, {nombre}.")
+            self.usuarios[email] = usuario_obj
+            print(f"Bienvenido, {usuario_obj.nombre}.")
             return usuario_obj
         print("Usuario o contraseña incorrectos.")
         return None

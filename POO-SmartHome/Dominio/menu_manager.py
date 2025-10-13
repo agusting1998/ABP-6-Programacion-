@@ -1,6 +1,15 @@
-import dispositivos
+import os
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.parent / "Dao"))
+
+from usuario_dao import UsuarioDAO
+from dispositivos import agregar_dispositivo, listar_dispositivos, cambiar_estado, eliminar_dispositivo
 from automatizaciones import control_automatizaciones, consultar_automatizaciones_activas
 from usuario import GestorUsuarios
+
+usuario_dao = UsuarioDAO()
+gestor = GestorUsuarios()
 
 def menu_estandar(usuario_obj):
     while True:
@@ -14,7 +23,7 @@ def menu_estandar(usuario_obj):
         if opcion == '1':
             usuario_obj.consultar_datos_personales()
         elif opcion == '2':
-            dispositivos.listar_dispositivos(usuario_obj)
+            listar_dispositivos(usuario_obj)
         elif opcion == '3':
             control_automatizaciones.modo_ahorro_energia(usuario_obj)
         elif opcion == '4':
@@ -22,7 +31,7 @@ def menu_estandar(usuario_obj):
         else:
             print("Opción inválida.")
 
-def menu_admin(usuario_obj, gestor):
+def menu_admin(usuario_obj):
     while True:
         print(f"\n--- Menú Admin ({usuario_obj.nombre}) ---")
         print("1. Gestionar dispositivos")
@@ -36,9 +45,9 @@ def menu_admin(usuario_obj, gestor):
         elif opcion == '2':
             consultar_automatizaciones_activas()
         elif opcion == '3':
-            nombre_target = input("Nombre usuario: ")
+            email_target = input("Email del usuario: ")
             nuevo_rol = input("Nuevo rol: ").lower()
-            target = gestor.usuarios.get(nombre_target)
+            target = gestor.usuarios.get(email_target)
             if target:
                 target.modificar_rol(nuevo_rol)
             else:
@@ -59,20 +68,20 @@ def menu_gestion_dispositivos(usuario_obj):
         if opcion == '1':
             nombre = input("Nombre dispositivo: ")
             tipo = input("Tipo: ")
-            dispositivos.agregar_dispositivo(usuario_obj.email, nombre, tipo)
+            agregar_dispositivo(usuario_obj.email, nombre, tipo)
         elif opcion == '2':
-            dispositivos.listar_dispositivos(usuario_obj)
+            listar_dispositivos(usuario_obj)
         elif opcion == '3':
             nombre = input("Nombre dispositivo: ")
             estado = input("Nuevo estado: ")
-            dispositivos.cambiar_estado(usuario_obj, nombre, estado)
+            cambiar_estado(usuario_obj, nombre, estado)
         elif opcion == '4':
             nombre = input("Nombre dispositivo: ")
-            dispositivos.eliminar_dispositivo(usuario_obj, nombre)
+            eliminar_dispositivo(usuario_obj, nombre)
         elif opcion == '5':
             break
 
-def menu_principal(gestor):
+def menu_principal():
     while True:
         print("\n--- Menú Principal ---")
         print("1. Iniciar sesión")
@@ -81,12 +90,12 @@ def menu_principal(gestor):
         opcion = input("Elige opción: ")
 
         if opcion == "1":
-            nombre = input("Usuario: ")
+            email = input("Email: ")
             passw = input("Contraseña: ")
-            usuario_obj = gestor.iniciar_sesion(nombre, passw)
+            usuario_obj = gestor.iniciar_sesion(email, passw)
             if usuario_obj:
                 if usuario_obj.rol == "admin":
-                    menu_admin(usuario_obj, gestor)
+                    menu_admin(usuario_obj)
                 else:
                     menu_estandar(usuario_obj)
 
@@ -94,7 +103,16 @@ def menu_principal(gestor):
             nombre = input("Nombre: ")
             passw = input("Contraseña: ")
             rol = input("Rol ('admin' o 'estandar'): ").lower()
-            gestor.registrar_usuario(nombre, passw, rol)
+            email = input("Email único para este usuario: ")
+            nuevo_usuario = gestor.registrar_usuario(nombre, passw, rol, email)
+            if nuevo_usuario:
+                usuario_dao.agregar(nuevo_usuario)
+                print(f"Usuario {nombre} registrado como {rol}.")
+            else:
+                print("No se pudo registrar el usuario.")
 
         elif opcion == "0":
             break
+
+if __name__ == "__main__":
+    menu_principal()

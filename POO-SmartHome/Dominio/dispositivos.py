@@ -15,9 +15,6 @@ class LuzInteligente(Dispositivo):
         super().__init__(nombre, "luz", estado)
 
 def agregar_dispositivo(usuario_email, nombre, tipo, estado="apagado"):
-    """
-    Agrega dispositivo a la DB y devuelve el objeto.
-    """
     if tipo.lower() == "luz":
         disp = LuzInteligente(nombre, estado)
     else:
@@ -46,13 +43,13 @@ def listar_dispositivos(usuario_obj):
         "WHERE g.email_usuario = %s", (usuario_obj.email,)
     )
     rows = cursor.fetchall()
+    conn.close()
     if not rows:
         print("No hay dispositivos registrados.")
     else:
         print("\nDispositivos registrados:")
         for idx, (nombre, tipo, estado) in enumerate(rows, start=1):
             print(f"ID: {idx} | Nombre: {nombre} | Tipo: {tipo} | Estado: {estado}")
-    conn.close()
 
 def cambiar_estado(usuario_obj, nombre_dispositivo, nuevo_estado):
     conn = get_connection()
