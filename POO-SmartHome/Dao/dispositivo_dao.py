@@ -3,8 +3,9 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Dominio'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Conn'))
 
+from conn.db_conn import get_connection
 from dispositivos import Dispositivo, LuzInteligente
-from db_conn import get_connection
+
 
 class DispositivoDAO:
     def agregar(self, usuario_email, nombre, tipo, estado="apagado"):
