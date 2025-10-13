@@ -1,4 +1,7 @@
-from connection import get_connection
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Conn'))
+from db_conn import get_connection
 
 class Usuario:
     def __init__(self, nombre, passw, rol, email):
