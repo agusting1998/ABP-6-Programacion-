@@ -32,10 +32,12 @@ class ControlAutomatizaciones:
     def guardar_activacion(self, email_usuario, nombre_automatizacion):
         try:
             conn = get_connection()
+            if not conn:
+                return
             cursor = conn.cursor()
 
             cursor.execute("""
-                INSERT IGNORE INTO automatizacion (nombre_automatizacion)
+                INSERT IGNORE INTO Automatizacion (nombre_automatizacion)
                 VALUES (%s)
             """, (nombre_automatizacion,))
 
@@ -45,10 +47,12 @@ class ControlAutomatizaciones:
             )
 
             conn.commit()
+            print("Activación registrada exitosamente.")
         except Exception as e:
             print(f"Error al guardar la activación: {e}")
         finally:
             if conn:
+                cursor.close()
                 conn.close()
 
 control_automatizaciones = ControlAutomatizaciones()

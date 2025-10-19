@@ -13,21 +13,23 @@ class Usuario:
 
     def consultar_datos_personales(self):
         print(f"\nDatos de {self.nombre}:")
-        print(f"- Rol: {self.rol}")
-        print(f"- Email: {self.email}")
-        print(f"- Dispositivos registrados: {len(self.dispositivos)}")
+        print(f"  - Rol: {self.rol}")
+        print(f"  - Email: {self.email}")
+        print(f"  - Dispositivos registrados: {len(self.dispositivos)}")
 
     def modificar_rol(self, nuevo_rol):
         self.rol = nuevo_rol
 
         try:
             conn = get_connection()
-            cursor = conn.cursor()
-            cursor.execute("UPDATE Usuario SET rol=%s WHERE email=%s", (nuevo_rol, self.email))
-            conn.commit()
-            conn.close()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE Usuario SET rol=%s WHERE email=%s", (nuevo_rol, self.email))
+                conn.commit()
+                cursor.close()
+                conn.close()
         except Exception as e:
-            pass 
+            print(f"Error al actualizar rol en BD: {e}")
 
         print(f"Rol de {self.nombre} modificado a {nuevo_rol}.")
 
@@ -69,5 +71,6 @@ class GestorUsuarios:
             print("No hay usuarios registrados.") 
             return
             
+        print("\n--- Usuarios Registrados ---")
         for u in self.usuarios.values():
             print(f"- {u.nombre} | {u.email} | {u.rol}")
