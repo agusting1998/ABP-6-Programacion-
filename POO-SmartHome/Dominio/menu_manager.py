@@ -4,11 +4,12 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.parent / "Dao"))
 
 from usuario_dao import UsuarioDAO
-from dispositivos import agregar_dispositivo, listar_dispositivos, cambiar_estado, eliminar_dispositivo
+from dispositivo_dao import DispositivoDAO
 from automatizaciones import control_automatizaciones, consultar_automatizaciones_activas
 from usuario import GestorUsuarios
 
 usuario_dao = UsuarioDAO()
+dispositivo_dao = DispositivoDAO()
 gestor = GestorUsuarios()
 
 def menu_estandar(usuario_obj):
@@ -23,7 +24,13 @@ def menu_estandar(usuario_obj):
         if opcion == '1':
             usuario_obj.consultar_datos_personales()
         elif opcion == '2':
-            listar_dispositivos(usuario_obj)
+            dispositivos = dispositivo_dao.listar_por_usuario(usuario_obj)
+            if not dispositivos:
+                print("No hay dispositivos registrados.")
+            else:
+                print("\n--- Dispositivos Registrados ---")
+                for idx, disp in enumerate(dispositivos, start=1):
+                    print(f"  {idx}. {disp.nombre} | Tipo: {disp.tipo} | Estado: {disp.estado}")
         elif opcion == '3':
             control_automatizaciones.modo_ahorro_energia(usuario_obj)
         elif opcion == '4':
@@ -85,14 +92,20 @@ def menu_gestion_dispositivos(usuario_obj):
             if not tipo:
                 print("El tipo no puede estar vacío.")
                 continue
-            resultado = agregar_dispositivo(usuario_obj.email, nombre, tipo)
+            resultado = dispositivo_dao.agregar(usuario_obj.email, nombre, tipo)
             if resultado:
                 print(f"Dispositivo '{nombre}' registrado correctamente.")
             else:
                 print("Error al registrar el dispositivo.")
                 
         elif opcion == '2':
-            listar_dispositivos(usuario_obj)
+            dispositivos = dispositivo_dao.listar_por_usuario(usuario_obj)
+            if not dispositivos:
+                print("No hay dispositivos registrados.")
+            else:
+                print("\n--- Dispositivos Registrados ---")
+                for idx, disp in enumerate(dispositivos, start=1):
+                    print(f"  {idx}. {disp.nombre} | Tipo: {disp.tipo} | Estado: {disp.estado}")
             
         elif opcion == '3':
             nombre = input("Nombre dispositivo: ").strip()
@@ -103,7 +116,7 @@ def menu_gestion_dispositivos(usuario_obj):
             if estado not in ["encendido", "apagado"]:
                 print("Estado inválido. Use 'encendido' o 'apagado'.")
                 continue
-            cambiar_estado(usuario_obj, nombre, estado)
+            dispositivo_dao.cambiar_estado(usuario_obj, nombre, estado)
             
         elif opcion == '4':
             nombre = input("Nombre dispositivo: ").strip()
@@ -112,8 +125,7 @@ def menu_gestion_dispositivos(usuario_obj):
                 continue
             confirmar = input(f"¿Deseas eliminar '{nombre}'? (s/n): ").strip().lower()
             if confirmar == 's':
-                eliminar_dispositivo(usuario_obj, nombre)
-                print("Dispositivo eliminado.")
+                dispositivo_dao.eliminar(usuario_obj, nombre)
             else:
                 print("Operación cancelada.")
                 
